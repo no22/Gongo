@@ -1,0 +1,20 @@
+{
+	"name": "no22/GongoPHPDev",
+	"type": "library",
+	"description": "Web application framework",
+	"keywords": ["framework"],
+	"license": ["MIT", "GPL-3.0+"],
+	"authors": [
+		{
+			"name": "Hiroyuki OHARA",
+			"email": "Hiroyuki.no22@gmail.com"
+		}
+	],
+	"require": {
+		"php": ">=5.2.4",
+		"no22/sloth": "dev-master"
+	},
+	"autoload": {
+		"files" : ["lib/Gongo/Autoload.php"]
+	}
+}
