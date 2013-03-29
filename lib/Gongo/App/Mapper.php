@@ -4,6 +4,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 	public $uses = array(
 		'db' => 'Gongo_Db',
 		'mapper' => 'Gongo_Db_Mapper',
+		'converter' => null,
 		'queryWriter' => 'Gongo_Db_QueryWriter',
 		'relation' => null,
 		'-table' => null,

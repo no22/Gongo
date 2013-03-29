@@ -1,74 +1,86 @@
 <?php
 class Gongo_App_Form extends Gongo_App_Container 
 {
-	function makeConfirmSessionName($controller, $suffix = 'ConfirmData')
+	function makeConfirmSessionName($sessionName, $suffix = 'ConfirmData')
 	{
-		return $controller->options->id . $suffix;
+		return $sessionName . $suffix;
 	}
 
-	function saveConfirmData($app, $controller, $bean, $suffix = 'ConfirmData')
+	function saveConfirmData($app, $sessionName, $bean, $suffix = 'ConfirmData')
 	{
 		$data = $bean instanceof Gongo_Bean ? $bean->_() : $bean ;
-		$sessionName = $this->makeConfirmSessionName($controller, $suffix);
+		$sessionName = $this->makeConfirmSessionName($sessionName, $suffix);
 		$app->session->{$sessionName} = $data;
 	}
 
-	function loadConfirmData($app, $controller, $suffix = 'ConfirmData')
+	function loadConfirmData($app, $sessionName, $suffix = 'ConfirmData')
 	{
-		$sessionName = $this->makeConfirmSessionName($controller, $suffix);
+		$sessionName = $this->makeConfirmSessionName($sessionName, $suffix);
 		return $app->session->{$sessionName};
 	}
 
-	function loadForm($app, $controller, $bean) 
+	function loadForm($app, $bean) 
 	{
-		$data = $bean instanceof Gongo_Bean ? $bean->_() : $bean ;
-		return $controller->mapper->newBean($data, $this);
+		$data = $bean instanceof Gongo_Bean ? $bean->_() : (array) $bean ;
+		return Gongo_Bean::cast($this, $data);
 	}
 
-	function importForm($app, $controller, $bean = null, $converter = null) 
+	function importForm($app, $mapper, $bean = null, $converter = null) 
 	{
-		$bean = $bean ? $bean : $controller->mapper->emptyBean() ;
+		$bean = $bean ? $bean : $mapper->emptyBean() ;
 		if (!is_null($converter)) {
 			$form = $converter->import($this, $bean);
-		} else if ($controller->__converter) {
-			$form = $controller->converter->import($this, $bean);
+		} else if ($mapper->__converter) {
+			$form = $mapper->converter->import($this, $bean);
 		} else {
 			$form = Gongo_Bean::cast($this, $bean, false, true);
 		}
 		return $form;
 	}
 
-	function exportForm($app, $controller, $bean = null, $converter = null) 
+	function exportForm($app, $mapper, $bean = null, $converter = null) 
 	{
-		$bean = $bean ? $bean : $controller->mapper->emptyBean() ;
+		$bean = $bean ? $bean : $mapper->emptyBean() ;
 		if (!is_null($converter)) {
 			$form = $converter->export($this, $bean);
-		} else if ($controller->__converter) {
-			$bean = $controller->converter->export($this, $bean);
+		} else if ($mapper->__converter) {
+			$bean = $mapper->converter->export($this, $bean);
 		} else {
 			$bean = Gongo_Bean::cast($bean, $this, false, true);
 		}
 		return $bean;
 	}
 	
-	function restore($app, $controller, $id, $errorName = 'validationError', $suffix = 'ConfirmData')
+	function restore($app, $mapper, $id, $sessionName = '', $converter = null, $errorName = 'validationError', $suffix = 'ConfirmData')
 	{
+		$sessionName = $sessionName != '' ? $sessionName : $mapper->options->table ;
 		if ($app->error->{$errorName}) {
-			$form = $this->loadForm($app, $controller, $app->error->{$errorName}->postdata);
-		} else if ($this->loadConfirmData($app, $controller)) {
-			$form = $this->loadForm($app, $controller, $this->loadConfirmData($app, $controller));
-			$this->saveConfirmData($app, $controller, null, $suffix);
+			$form = $this->loadForm($app, $app->error->{$errorName}->postdata);
 		} else {
-			$bean = $id instanceof Gongo_Bean ? $id : $controller->mapper->readBean($app, $id) ;
-			$form = $this->importForm($app, $controller, $bean);
+			$confirmData = $this->loadConfirmData($app, $sessionName);
+			if ($confirmData) {
+				$form = $this->loadForm($app, $confirmData);
+				$this->saveConfirmData($app, $sessionName, null, $suffix);
+			} else {
+				$bean = $id instanceof Gongo_Bean ? $id : $mapper->readBean($app, $id) ;
+				$form = $this->importForm($app, $mapper, $bean, $converter);
+			}
 		}
 		return $form;
 	}
 
-	function exportBean($app, $controller, $bean)
+	function restoreForm($app, $controller, $id, $mapperName = 'mapper', $converterName = 'converter', $errorName = 'validationError', $suffix = 'ConfirmData') 
+	{
+		$sessionName = $controller->options->id ? $controller->options->id : get_class($controller) ;
+		$converter = $controller->{$converterName};
+		$mapper = $controller->{$mapperName};
+		return $this->restore($app, $mapper, $id, $sessionName, $converter, $errorName, $suffix);
+	}
+	
+	function exportBean($app, $mapper, $bean, $converter = null)
 	{
 		$data = $bean instanceof Gongo_Bean ? $bean->_() : $bean ;
-		$form = $this->loadForm($app, $controller, $data);
-		return $this->exportForm($app, $controller, $form);
+		$form = $this->loadForm($app, $data);
+		return $this->exportForm($app, $mapper, $form, $converter);
 	}
 }

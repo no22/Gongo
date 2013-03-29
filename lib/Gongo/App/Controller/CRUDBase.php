@@ -47,20 +47,20 @@ class Gongo_App_Controller_CRUDBase extends Gongo_App_Controller
 
 	function getEdit($app)
 	{
-		$form = $this->form->restore($app, $this, $app->get->id);
+		$form = $this->form->restore($app, $this->mapper, $app->get->id, $this->options->id);
 		return $this->render($app, '/edit', compact('form'));
 	}
 
 	function postEditSubmit($app)
 	{
-		$bean = $this->form->exportBean($app, $this, $app->post);
+		$bean = $this->form->exportBean($app, $this->mapper, $app->post);
 		$this->mapper->writeBean($app, $bean);
 		$this->redirect($app, '/index');
 	}
 
 	function postEditCancel($app)
 	{
-		$this->form->saveConfirmData($app, $this, $app->post);
+		$this->form->saveConfirmData($app, $this->options->id, $app->post);
 		$this->redirect($app, '/edit??');
 	}
 
@@ -73,7 +73,7 @@ class Gongo_App_Controller_CRUDBase extends Gongo_App_Controller
 
 	function postConfirmSubmit($app)
 	{
-		$form = $this->form->loadForm($app, $this, $app->post);
+		$form = $this->form->loadForm($app, $app->post);
 		return $this->render($app, '/confirm', compact('form'));
 	}
 
