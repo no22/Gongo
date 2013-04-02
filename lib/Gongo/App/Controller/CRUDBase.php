@@ -47,7 +47,7 @@ class Gongo_App_Controller_CRUDBase extends Gongo_App_Controller
 
 	function getEdit($app)
 	{
-		$form = $this->form->restore($app, $this->mapper, $app->get->id, $this->options->id);
+		$form = $this->form->restore($app, $this->mapper, $app->get->id, $this->options->id, $this->converter);
 		return $this->render($app, '/edit', compact('form'));
 	}
 
