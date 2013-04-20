@@ -21,7 +21,8 @@ class Gongo_File_Path
 		return $absPaths;
 	}
 
-	static function absolutePath($path) {
+	static function absolutePath($path, $root = null)
+	{
 		$path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
 		$parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
 		$absolutes = array();
@@ -33,6 +34,6 @@ class Gongo_File_Path
 				$absolutes[] = $part;
 			}
 		}
-		return implode(DIRECTORY_SEPARATOR, $absolutes);
+		return (is_null($root) ? DIRECTORY_SEPARATOR : $root) . implode(DIRECTORY_SEPARATOR, $absolutes);
 	}
 }

@@ -39,4 +39,24 @@ class Gongo_File
 		if ($path === $top && $delete) rmdir($top);
 		return true;
 	}
+
+	static function iter($path)
+	{
+		return Sloth::iter(Gongo_Locator::get('DirectoryIterator', $path));
+	}
+
+	static function scanDirIter($path, $order = 0, $context = null)
+	{
+		$files = is_null($context) ? scandir($path, $order) : scandir($path, $order, $context) ;
+		return Sloth::iter($files);
+	}
+
+	static function readableSize($size, $round = 1, $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB')) 
+	{
+		$mod = 1024;
+		for ($i = 0; $size > $mod; $i++) {
+			$size /= $mod;
+		}
+		return round($size, $round) . ' ' . $units[$i];
+	}
 }
