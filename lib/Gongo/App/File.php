@@ -15,7 +15,7 @@ class Gongo_App_File extends Gongo_App_Base
 	
 	public function send($path, $filename = null, $contentType = null, $type = 'inline')
 	{
-		$filename = is_null($filename) ? basename($path) : $filename ;
+		$filename = is_null($filename) ? Gongo_File_Path::basename($path) : $filename ;
 		$contentType = is_null($contentType) ? $this->mimeContentType($path) : $contentType ;
 		header("Content-type: {$contentType}");
 		header("Content-Disposition: {$type}; filename={$filename}");
@@ -26,7 +26,7 @@ class Gongo_App_File extends Gongo_App_Base
 
 	public function download($path, $filename = null) 
 	{
-		$filename = is_null($filename) ? basename($path) : $filename ;
+		$filename = is_null($filename) ? Gongo_File_Path::basename($path) : $filename ;
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/octet-stream");
 		header("Content-Type: application/download");

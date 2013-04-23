@@ -36,4 +36,9 @@ class Gongo_File_Path
 		}
 		return (is_null($root) ? DIRECTORY_SEPARATOR : $root) . implode(DIRECTORY_SEPARATOR, $absolutes);
 	}
+
+	static function basename($path) 
+	{
+		return substr($path, strrpos($path, DIRECTORY_SEPARATOR)+1);
+	}
 }
