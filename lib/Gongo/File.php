@@ -40,14 +40,107 @@ class Gongo_File
 		return true;
 	}
 
+	static function mv($src, $dst) 
+	{
+		return rename($src, $dst);
+	}
+
+	static function rm($path, $terminate = true) 
+	{
+		$path = is_array($path) ? $path : array($path) ;
+		foreach ($path as $file) {
+			if (is_file($file)) {
+				if (!unlink($file) && $terminate) return false;
+			} else if (is_dir($file)) {
+				if (!self::rmDir($file) && $terminate) return false;
+			}
+		}
+		return true;
+	}
+
+	static function cpDir($src, $dst, $overwrite = false)
+	{
+		$success = true;
+		if (!file_exists($src)) return false;
+		if (!file_exists($dst)) self::makeDir($dst);
+		if (!is_dir($dst)) return false;
+		$dstpath = rtrim($dst, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . Gongo_File_Path::basename($src);
+		if (!$overwrite && file_exists($dstpath)) return false;
+		if (is_file($src)) {
+			if (!copy($src, $dstpath)) return false;
+		} else if (is_dir($src)) {
+			self::makeDir($dstpath);
+			$src = rtrim($src, DIRECTORY_SEPARATOR);
+			foreach (scandir($src) as $filename) {
+				if ($filename === '.' || $filename === '..') continue;
+				if (strpos($filename, '.') === 0) continue;
+				if (!self::cpDir($src . DIRECTORY_SEPARATOR . $filename, $dstpath, $overwrite)) $success = false;
+			}
+		}
+		return $success;
+	}
+
+	static function mvDir($src, $dst, $overwrite = false)
+	{
+		$success = true;
+		if (!file_exists($src)) return false;
+		if (!file_exists($dst)) self::makeDir($dst);
+		if (!is_dir($dst)) return false;
+		$dstpath = rtrim($dst, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . Gongo_File_Path::basename($src);
+		if (!$overwrite && file_exists($dstpath)) return false;
+		if (is_file($src)) {
+			if (!self::mv($src, $dstpath)) return false;
+		} else if (is_dir($src)) {
+			self::makeDir($dstpath);
+			$src = rtrim($src, DIRECTORY_SEPARATOR);
+			foreach (scandir($src) as $filename) {
+				if ($filename === '.' || $filename === '..') continue;
+				if (strpos($filename, '.') === 0) continue;
+				if (!self::mvDir($src . DIRECTORY_SEPARATOR . $filename, $dstpath, $overwrite)) $success = false;
+			}
+			self::rmDir($src);
+		}
+		return $success;
+	}
+	
 	static function iter($path)
 	{
 		return Sloth::iter(Gongo_Locator::get('DirectoryIterator', $path));
 	}
 
-	static function scanDirIter($path, $order = 0, $context = null)
+	static function files($path, $files, $sort = "name") 
+	{
+		$path = rtrim($path, DIRECTORY_SEPARATOR);
+		$result = array();
+		$isName = $sort === 'name';
+		foreach ($files as $name) {
+			$filepath = $path . DIRECTORY_SEPARATOR . $name ;
+			$stat = stat($filepath);
+			$value = $isName ? $name : $stat[$sort] ;
+			if ($sort === 'size' && is_dir($filepath)) $value = 0;
+			$result[$name] = $value ;
+		}
+		return $result;
+	}
+	
+	static function scandir($path, $order = 0, $sort = 'name', $context = null) 
 	{
 		$files = is_null($context) ? scandir($path, $order) : scandir($path, $order, $context) ;
+		if ($sort !== 'name') {
+			$files = self::files($path, $files, $sort);
+			if ($order) {
+				arsort($files);
+			} else {
+				asort($files);
+			}
+			$files = array_keys($files);
+		}
+		return $files;
+	}
+	
+	static function scanDirIter($path, $order = 0, $sort = 'name', $context = null)
+	{
+		$files = self::scandir($path, $order, $sort, $context);
 		return Sloth::iter($files);
 	}
 
