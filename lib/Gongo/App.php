@@ -37,11 +37,16 @@ class Gongo_App extends Gongo_App_Base
 	
 	static function autoload($className)
 	{
+		$ns = '';
+		if (false !== ($lastNsPos = strrpos($className, '\\'))) {
+			$ns = Gongo_File_Path::make(strtr(substr($className, $lastNsPos), array('\\' => '/')));
+			$className = substr($className, $lastNsPos + 1);
+		}
 		$filePath = Gongo_File_Path::make('/' . strtr($className, array('_' => '/')) . '.php');
 		$paths = self::$environment->autoloadPaths;
 		foreach($paths as $path) {
-			if (is_file($path . $filePath)) {
-				include($path . $filePath);
+			if (is_file($path . $ns . $filePath)) {
+				require($path . $ns . $filePath);
 				return;
 			}
 		}
