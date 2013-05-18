@@ -292,12 +292,12 @@ class Gongo_App extends Gongo_App_Base
 		return $template->render($context, $viewName);
 	}
 
-	public function sendFile($path, $filename = null, $contentType = null, $type = 'inline')
+	public function sendFile($path, $filename = null, $contentType = null, $type = 'inline', $nosniff = true)
 	{
 		return $this->file->send($path, $filename, $contentType, $type);
 	}
 
-	public function sendDownload($path, $filename = null)
+	public function sendDownload($path, $filename = null, $nosniff = true)
 	{
 		return $this->file->download($filename, $path);
 	}

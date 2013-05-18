@@ -39,6 +39,7 @@ class Gongo_File_Path
 
 	static function basename($path) 
 	{
-		return substr($path, strrpos($path, DIRECTORY_SEPARATOR)+1);
+		$pos = strrpos($path, DIRECTORY_SEPARATOR);
+		return $pos === false ? $path : substr($path, $pos + 1);
 	}
 }

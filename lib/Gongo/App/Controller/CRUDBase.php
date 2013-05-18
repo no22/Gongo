@@ -53,7 +53,7 @@ class Gongo_App_Controller_CRUDBase extends Gongo_App_Controller
 
 	function postEditSubmit($app)
 	{
-		$bean = $this->form->exportBean($app, $this->mapper, $app->post);
+		$bean = $this->form->exportBean($app, $this->mapper, $app->post, $this->converter);
 		$this->mapper->writeBean($app, $bean);
 		$this->redirect($app, '/index');
 	}

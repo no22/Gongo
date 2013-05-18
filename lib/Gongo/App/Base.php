@@ -24,12 +24,4 @@ class Gongo_App_Base extends Gongo_Container
 		}
 		return null;
 	}
-
-	public function defaultValue($options, $sName, $mValue)
-	{
-		if (!isset($options[$sName])) {
-			$options[$sName] = $mValue;
-		}
-		return $options;
-	}
 }

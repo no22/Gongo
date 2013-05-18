@@ -13,10 +13,11 @@ class Gongo_App_File extends Gongo_App_Base
 		return $contentType;
 	}
 	
-	public function send($path, $filename = null, $contentType = null, $type = 'inline')
+	public function send($path, $filename = null, $contentType = null, $type = 'inline', $nosniff = true)
 	{
 		$filename = is_null($filename) ? Gongo_File_Path::basename($path) : $filename ;
 		$contentType = is_null($contentType) ? $this->mimeContentType($path) : $contentType ;
+		if ($nosniff) header('X-Content-Type-Options: nosniff');
 		header("Content-type: {$contentType}");
 		header("Content-Disposition: {$type}; filename={$filename}");
 		header("Content-Length: " . filesize($path));
@@ -24,9 +25,10 @@ class Gongo_App_File extends Gongo_App_Base
 		exit();
 	}
 
-	public function download($path, $filename = null) 
+	public function download($path, $filename = null, $nosniff = true) 
 	{
 		$filename = is_null($filename) ? Gongo_File_Path::basename($path) : $filename ;
+		if ($nosniff) header('X-Content-Type-Options: nosniff');
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/octet-stream");
 		header("Content-Type: application/download");
