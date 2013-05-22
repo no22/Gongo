@@ -75,6 +75,6 @@ class Gongo_App_Controller extends Gongo_App_Controller_Base
 
 	function tokenError($app)
 	{
-		return $app->error('500');
+		return $app->error('403');
 	}
 }

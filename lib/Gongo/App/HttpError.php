@@ -6,6 +6,7 @@ class Gongo_App_HttpError extends Gongo_App_Base
 		'500' => 'HTTP/1.0 500 Server Error',
 		'401' => 'HTTP/1.0 401 Unauthorized',
 		'403' => 'HTTP/1.0 403 Forbidden',
+		'503' => 'HTTP/1.0 503 Service Temporarily Unavailable',
 	);
 
 	public function render($app, $err, $fnCallback = false)

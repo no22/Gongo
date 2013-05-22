@@ -133,6 +133,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 		$scheme = $this->scheme;
 		$httpHost = $this->domain;
 		$port = $this->port;
+		if ($scheme === 'https' && $port === ':443') $port = '';
 		return $scheme . '://' . $httpHost . $port ;
 	}
 
@@ -140,6 +141,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		$httpHost = $this->domain;
 		$port = $this->port;
+		if ($port === ':443') $port = '';
 		return 'http://' . $httpHost . $port ;
 	}
 	
@@ -147,6 +149,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		$httpHost = $this->domain;
 		$port = $this->port;
+		if ($port === ':443') $port = '';
 		return 'https://' . $httpHost . $port ;
 	}
 

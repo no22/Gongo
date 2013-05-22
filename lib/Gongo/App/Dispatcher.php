@@ -187,7 +187,7 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 			$request = $app->post->_();
 		}
 		$eRequest = isset($e['submit']) ? array_merge($request, array($e['submit'] => '')) : $request ;
-		$eSecure = isset($e['https']) ? $e['https'] : $app->server->HTTPS ;
+		$eSecure = isset($e['https']) ? $e['https'] : $app->env()->path->https ;
 
 		$this->currentAction = $eAction;
 		$methodName = $this->makeControllerMethodName($eAction, $eMethod, $eRequest);
