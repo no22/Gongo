@@ -173,7 +173,7 @@ class Gongo_App_Validator extends Gongo_App_Base
 
 	public function isEmpty($value, $params)
 	{
-		return $value != '';
+		return $value == '';
 	}
 
 	public function notEmptyIfIDExistsHandler($aData, $key, $rule)

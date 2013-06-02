@@ -18,8 +18,14 @@ class Gongo_App_View extends Gongo_App_Base
 		return $obj;
 	}
 
+	function beforeRender($app, $viewname, $context = array()) 
+	{
+		return array($viewname, $context);
+	}
+	
 	public function render($app, $viewname, $context = array())
 	{
+		list($viewname, $context) = $this->beforeRender($app, $viewname, $context);
 		$context = array_merge($this->context->_(), $context);
 		return $app->render($viewname, $context, $this->template);
 	}
