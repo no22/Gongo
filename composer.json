@@ -15,6 +15,6 @@
 		"no22/sloth": "dev-master"
 	},
 	"autoload": {
-		"files" : ["lib/Gongo/Autoload.php"]
+		"files" : ["lib/Gongo/Autoload.php", "lib/Gongo/core.php"]
 	}
 }

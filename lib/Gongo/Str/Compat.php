@@ -1,5 +1,5 @@
 <?php
-!count(debug_backtrace()) and require dirname(__FILE__) . "/../../gongo.php";
+//!count(debug_backtrace()) and require dirname(__FILE__) . "/../../gongo.php";
 /**
  * Gongo_Str_Compat
  * 
@@ -44,4 +44,4 @@ class Gongo_Str_Compat extends Gongo_Str_Base
 	}
 }
 
-!count(debug_backtrace()) and Sloth::doctest(__FILE__);
+//!count(debug_backtrace()) and Sloth::doctest(__FILE__);
