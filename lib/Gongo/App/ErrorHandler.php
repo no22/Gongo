@@ -40,8 +40,21 @@ class Gongo_App_ErrorHandler extends Gongo_App_Base
  	public function handleError($app, $errno, $message, $file, $line)
 	{
 		$aError = compact('errno', 'message', 'file', 'line');
+		if (Gongo_App::cfg()->Debug->use_debug_trace(false)) {
+			$aError['trace'] = $this->getTrace();
+		}
 		Gongo_App::cfg()->Debug->use_debug_mail(false) and $app->log($aError, Gongo_App::cfg()->Debug->email);
 		Gongo_App::cfg()->Debug->use_debug_log(false) and $app->log($aError);
 		return $this->error($app, $aError, $app->env()->development);
 	}
+
+	protected function getTrace() 
+	{
+		ob_start();
+		debug_print_backtrace();
+		$trace = ob_get_contents();
+		ob_end_clean();
+		return $trace;
+	}
+	
 }

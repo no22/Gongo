@@ -28,9 +28,16 @@ class Gongo_App_ExceptionHandler extends Gongo_App_Base
 			'file' => $exception->getFile(),
 			'line' => $exception->getLine(),
 		);
+		if (Gongo_App::cfg()->Debug->use_debug_trace(false)) {
+			$aError['trace'] = $this->getTrace($exception);
+		}
 		Gongo_App::cfg()->Debug->use_debug_mail(false) and $app->log($aError, Gongo_App::cfg()->Debug->email);
 		Gongo_App::cfg()->Debug->use_debug_log(false) and $app->log($aError);
-		$aError['trace'] = $exception->getTraceAsString();
 		return $this->error($app, $aError, $app->env()->development);
+	}
+
+	protected function getTrace($exception) 
+	{
+		return $exception->getTraceAsString();
 	}
 }
