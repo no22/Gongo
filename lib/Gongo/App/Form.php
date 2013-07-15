@@ -30,7 +30,7 @@ class Gongo_App_Form extends Gongo_App_Container
 		$bean = $bean ? $bean : $mapper->emptyBean() ;
 		if (!is_null($converter)) {
 			$form = $converter->import($this, $bean);
-		} else if ($mapper->__converter) {
+		} else if (!is_null($mapper) && $mapper->__converter) {
 			$form = $mapper->converter->import($this, $bean);
 		} else {
 			$form = Gongo_Bean::cast($this, $bean, false, true);
@@ -43,7 +43,7 @@ class Gongo_App_Form extends Gongo_App_Container
 		$bean = $bean ? $bean : $mapper->emptyBean() ;
 		if (!is_null($converter)) {
 			$form = $converter->export($this, $bean);
-		} else if ($mapper->__converter) {
+		} else if (!is_null($mapper) && $mapper->__converter) {
 			$bean = $mapper->converter->export($this, $bean);
 		} else {
 			$bean = Gongo_Bean::cast($bean, $this, false, true);
