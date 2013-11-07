@@ -3,12 +3,23 @@ class Gongo_App_DB_PDO_Builder
 {
 	public function get($env)
 	{
-		$options = $this->getOptions($env, $env->config->Database->dsn);
-		$pdo = new PDO(
-			$env->config->Database->dsn, 
-			$env->config->Database->user, $env->config->Database->password ,
-			$options
-		);
+		if (!Gongo_App_Environment::read('GONGO_OVERRIDE_DB_CONFIG')) {
+			$dsn = $env->config->Database->dsn;
+			$user = $env->config->Database->user;
+			$password = $env->config->Database->password;
+		} else {
+			if ($env->devMode) {
+				$dsn = Gongo_App_Environment::read('GONGO_DEVELOPMENT_DB_DSN');
+				$user = Gongo_App_Environment::read('GONGO_DEVELOPMENT_DB_USER');
+				$password = Gongo_App_Environment::read('GONGO_DEVELOPMENT_DB_PASSWORD');
+			} else {
+				$dsn = Gongo_App_Environment::read('GONGO_PRODUCTION_DB_DSN');
+				$user = Gongo_App_Environment::read('GONGO_PRODUCTION_DB_USER');
+				$password = Gongo_App_Environment::read('GONGO_PRODUCTION_DB_PASSWORD');
+			}
+		}
+		$options = $this->getOptions($env, $dsn);
+		$pdo = new PDO($dsn, $user, $password, $options);
 		return $pdo;
 	}
 

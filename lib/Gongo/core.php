@@ -153,7 +153,7 @@ class Gongo_App extends Gongo_App_Base
 	static $appRootPath = null;
 	static $environment = null;
 	static $application = null;
-	
+
 	protected $filters = array(
 		'before' => array(),
 		'after' => array(),
@@ -183,7 +183,7 @@ class Gongo_App extends Gongo_App_Base
 		'root' => null,
 		'basepath' => null,
 	);
-	
+
 	static function autoload($className)
 	{
 		$ns = '';
@@ -200,7 +200,7 @@ class Gongo_App extends Gongo_App_Base
 			}
 		}
 	}
-	
+
 	static function preload()
 	{
 		$paths = self::$environment->preloadPaths;
@@ -210,7 +210,7 @@ class Gongo_App extends Gongo_App_Base
 			}
 		}
 	}
-	
+
 	static function initializeApplication($app, $path = null)
 	{
 		if (!is_null($path) && is_null(self::$appRootPath)) {
@@ -224,10 +224,14 @@ class Gongo_App extends Gongo_App_Base
 			// Locator
 			$locator = Gongo_Locator::getInstance();
 			$locator->config(self::$environment->config);
-			$gongoBuilderClass = self::cfg()->Locator->Gongo_Builder('Gongo_Builder');
+			$gongoBuilderClass = self::cfg()->Locator->Gongo_Builder;
 			if ($gongoBuilderClass) {
 				$locator->injectBuilder($gongoBuilderClass);
+				self::$environment = Gongo_App_Environment::get(self::$appRootPath, true);
+				self::cfg(self::$environment->config);
 			}
+			$errorReporting = self::cfg()->Error->error_reporting;
+			if ($errorReporting) error_reporting($errorReporting);
 			// autoloader
 			spl_autoload_register('Gongo_App::autoload');
 			// preload
@@ -255,12 +259,12 @@ class Gongo_App extends Gongo_App_Base
 	{
 		return $obj->init($this);
 	}
-	
+
 	public function afterInitConfig($obj)
 	{
 		return $obj->_(self::cfg()->_());
 	}
-	
+
 	protected function initializeErrorHandler()
 	{
 		self::cfg() && self::cfg()->Error->use_error_handler(true) and set_error_handler(
@@ -465,14 +469,14 @@ class Gongo_App extends Gongo_App_Base
 	{
 		return $this->env()->log->add($text);
 	}
-	
+
 	public function basepath($path = null)
 	{
 		if (is_null($path)) return $this->basepath;
 		$this->basepath = $path;
 		return $this;
 	}
-	
+
 	public function path($query = null, $args = null, $action = null, $basepath = null, $type = 0, $short = false)
 	{
 		return $this->dispatcher->path($this, $query, $args, $action, $basepath, $type, $short);
@@ -526,50 +530,59 @@ class Gongo_Component_Container
 class Gongo_App_Environment extends Gongo_Component_Container
 {
 	static $env = null;
-	
-	static function get($root)
+
+	static function get($root, $regen = false)
 	{
-		if (is_null(self::$env)) {
+		if (is_null(self::$env) || $regen) {
 			self::$env = Gongo_Locator::get('Gongo_App_Environment', $root);
 		}
 		return self::$env;
 	}
-	
+
+	static function read($key, $default = null)
+	{
+		if (isset($_SERVER[$key])) return $_SERVER[$key];
+		if ($value = getenv($key) !== false) return $value;
+		return $default;
+	}
+
 	public $root;
-	
+
 	function __construct($root)
 	{
 		$this->root = $root;
 	}
-	
+
 	function _path()
 	{
 		return Gongo_Locator::get('Gongo_App_Path', $this->root);
 	}
-	
+
 	function _configProduction()
 	{
 		return Gongo_Locator::get('Gongo_Config', $this->path->configProduction);
 	}
-	
+
 	function _configDevelopment()
 	{
 		return Gongo_Locator::get('Gongo_Config', $this->path->configDevelopment);
 	}
-	
+
 	function _configDefault()
 	{
 		return Gongo_Locator::get('Gongo_Config', $this->path->configFile);
 	}
-	
+
 	function _devMode()
 	{
 		$devServer = $this->configDefault->Server->development;
 		$prdServer = $this->configDefault->Server->production;
 		$devMode = false;
-		if ($devServer !== '' && ($_SERVER['SERVER_ADDR'] === $devServer || $_SERVER['SERVER_NAME'] === $devServer)) {
+		$serverAddr = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '' ;
+		$serverName = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '' ;
+		if ($devServer !== '' && ($serverAddr === $devServer || $serverName === $devServer)) {
 			$devMode = true;
-		} else if ($prdServer !== '' && ($_SERVER['SERVER_ADDR'] === $prdServer || $_SERVER['SERVER_NAME'] === $prdServer)) {
+		} else if ($prdServer !== '' && ($serverAddr === $prdServer || $serverName === $prdServer)) {
 			$devMode = false;
 		}
 		return $devMode;
@@ -584,7 +597,7 @@ class Gongo_App_Environment extends Gongo_Component_Container
 	{
 		return !$this->devMode;
 	}
-	
+
 	function _config()
 	{
 		$base = $this->configDefault;
@@ -597,7 +610,7 @@ class Gongo_App_Environment extends Gongo_Component_Container
 		$paths = $this->config->Path->autoload;
 		return Gongo_File_Path::preparePaths($paths, $this->path->root);
 	}
-	
+
 	function _preloadPaths()
 	{
 		$paths = $this->config->Path->preload;
@@ -635,11 +648,13 @@ class Gongo_Locator
 {
 	static public $defaultConfig = null;
 	static $serviceLocator = null;
+	static $defaultBuilder = 'Gongo_Builder';
+	static $environmentVariable = 'GONGO_BUILDER';
 	protected $serviceBuilder = null;
 	protected $config = null;
 	protected $refParams = array();
 	protected $refClasses = array();
-	
+
 	static function setConfig($cfg = null)
 	{
 		self::$defaultConfig = is_null($cfg) ? Gongo_Config::get() : $cfg ;
@@ -648,7 +663,7 @@ class Gongo_Locator
 	static public function getInstance()
 	{
 		if (is_null(self::$serviceLocator)) {
-			self::$serviceLocator = new self; 
+			self::$serviceLocator = new self;
 		}
 		return self::$serviceLocator;
 	}
@@ -721,26 +736,29 @@ class Gongo_Locator
 		$this->serviceBuilder = $builder;
 		return $this;
 	}
-	
+
 	public function injectBuilder($builderClass, $args = array())
 	{
 		$this->builder($this->newObj($builderClass, $args));
 	}
-	
+
 	public function config($config = null)
 	{
 		if (is_null($config)) return $this->config;
 		$this->config = $config;
 		return $this;
 	}
-	
+
 	public function __construct($builder = null)
 	{
 		if (!is_null(self::$defaultConfig)) {
 			$this->config(self::$defaultConfig);
 		}
 		if (is_null($builder)) {
-			$builderClass = 'Gongo_Builder';
+			$environmentVariable = self::$environmentVariable;
+			$builderClass = isset($_SERVER[$environmentVariable]) ? $_SERVER[$environmentVariable] : false ;
+			if (!$builderClass) $builderClass = getenv($environmentVariable);
+			if (!$builderClass) $builderClass = self::$defaultBuilder;
 			$config = $this->config();
 			if (!is_null($config)) {
 				$builderClass = $config->Locator->Gongo_Builder ? $config->Locator->Gongo_Builder : $builderClass ;
@@ -757,7 +775,7 @@ class Gongo_Locator
 		$className = array_shift($args);
 		return self::build($this, $className, $args);
 	}
-	
+
 	public function makeObj($className, $args)
 	{
 		return self::build($this, $className, $args);
@@ -795,34 +813,34 @@ class Gongo_Builder
 class Gongo_App_Path extends Gongo_Component_Container
 {
 	public $root;
-	
+
 	function __construct($root)
 	{
 		$this->root = $root;
 	}
-	
+
 	function _app()
 	{
 		return $this->root . Gongo_File_Path::make('/app');
 	}
-	
+
 	function _temp()
 	{
 		$path = $this->root . Gongo_File_Path::make('/work');
 		Gongo_File::makeDir($path);
 		return $path;
 	}
-	
+
 	function _sessionSavePath($path)
 	{
 		return $this->root . Gongo_File_Path::make($path);
 	}
-	
+
 	function _template()
 	{
 		return $this->root . Gongo_File_Path::make('/template');
 	}
-	
+
 	function _config()
 	{
 		return $this->root . Gongo_File_Path::make('/config');
@@ -845,6 +863,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 
 	function _log()
 	{
+		if (!$this->temp) return false;
 		$path = $this->temp . Gongo_File_Path::make('/logs');
 		Gongo_File::makeDir($path);
 		return $path;
@@ -852,11 +871,13 @@ class Gongo_App_Path extends Gongo_Component_Container
 
 	function _logFile()
 	{
+		if (!$this->log) return false;
 		return $this->log . Gongo_File_Path::make('/log_' . date('Y-m-d') . '.txt');
 	}
 
 	function _sqlLogFile()
 	{
+		if (!$this->log) return false;
 		return $this->log . Gongo_File_Path::make('/sqllog_' . date('Y-m-d') . '.txt');
 	}
 
@@ -869,12 +890,12 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		return $this->webapp . Gongo_File_Path::make('/lib');
 	}
-	
+
 	function _home()
 	{
 		return dirname($this->webapp);
 	}
-	
+
 	function _htmlPath()
 	{
 		return Gongo_Locator::get('Gongo_App_Path_DocumentRoot', $this);
@@ -899,7 +920,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		return $this->htmlPath->img;
 	}
-	
+
 	function _domain()
 	{
 		return isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '' ;
@@ -910,11 +931,11 @@ class Gongo_App_Path extends Gongo_Component_Container
 		return isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '' ;
 	}
 
-	function _https() 
+	function _https()
 	{
 		return isset($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN);
 	}
-	
+
 
 	function _scheme()
 	{
@@ -937,7 +958,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 		if ($port === ':443') $port = '';
 		return 'http://' . $httpHost . $port ;
 	}
-	
+
 	function _rootUrlHttps()
 	{
 		$httpHost = $this->domain;
@@ -946,16 +967,27 @@ class Gongo_App_Path extends Gongo_Component_Container
 		return 'https://' . $httpHost . $port ;
 	}
 
+	function _originalRequestPath()
+	{
+		return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+	}
+
 	function _requestPath()
 	{
-		$path = isset($_GET['__url__']) ? $_GET['__url__'] : '' ;
-		if ($path != '' && !Gongo_Str::startsWith($path, '/')) $path = '/' . $path;
+		if (isset($_SERVER['GONGO_MOUNT_POINT'])) {
+			$mountPoint = $_SERVER['GONGO_MOUNT_POINT'];
+			$path = substr($this->originalRequestPath, strlen($mountPoint));
+			if ($path === '/') $path = '';
+		} else {
+			$path = isset($_GET['__url__']) ? $_GET['__url__'] : '' ;
+			if ($path != '' && !Gongo_Str::startsWith($path, '/')) $path = '/' . $path;
+		}
 		return $path;
 	}
 
 	function _mountPoint()
 	{
-		list($reqUrl) = explode('?',$_SERVER['REQUEST_URI']);
+		$reqUrl = $this->originalRequestPath;
 		if ($reqUrl == '/index.php' && $this->requestPath == '') {
 			$this->requestPath = 'index.php' ;
 			$mountPoint = '';
@@ -971,12 +1003,12 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		return Gongo_Str::startsWith($this->requestPath, '/') ? $this->requestPath : '/' . $this->requestPath ;
 	}
-	
+
 	function _smarty2()
 	{
 		return Gongo_Locator::get('Gongo_App_Path_Smarty2', $this);
 	}
-	
+
 	function _smarty3()
 	{
 		return Gongo_Locator::get('Gongo_App_Path_Smarty3', $this);
@@ -1675,8 +1707,8 @@ class Gongo_Bean_ArrayWrapper extends Gongo_Bean
 	{
 		$this->_data = &$data;
 	}
-	
-	public function &_()
+
+	public function &_($ary = null)
 	{
 		return $this->_data;
 	}

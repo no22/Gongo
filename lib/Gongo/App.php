@@ -4,7 +4,7 @@ class Gongo_App extends Gongo_App_Base
 	static $appRootPath = null;
 	static $environment = null;
 	static $application = null;
-	
+
 	protected $filters = array(
 		'before' => array(),
 		'after' => array(),
@@ -34,7 +34,7 @@ class Gongo_App extends Gongo_App_Base
 		'root' => null,
 		'basepath' => null,
 	);
-	
+
 	static function autoload($className)
 	{
 		$ns = '';
@@ -51,7 +51,7 @@ class Gongo_App extends Gongo_App_Base
 			}
 		}
 	}
-	
+
 	static function preload()
 	{
 		$paths = self::$environment->preloadPaths;
@@ -61,7 +61,7 @@ class Gongo_App extends Gongo_App_Base
 			}
 		}
 	}
-	
+
 	static function initializeApplication($app, $path = null)
 	{
 		if (!is_null($path) && is_null(self::$appRootPath)) {
@@ -75,10 +75,14 @@ class Gongo_App extends Gongo_App_Base
 			// Locator
 			$locator = Gongo_Locator::getInstance();
 			$locator->config(self::$environment->config);
-			$gongoBuilderClass = self::cfg()->Locator->Gongo_Builder('Gongo_Builder');
+			$gongoBuilderClass = self::cfg()->Locator->Gongo_Builder;
 			if ($gongoBuilderClass) {
 				$locator->injectBuilder($gongoBuilderClass);
+				self::$environment = Gongo_App_Environment::get(self::$appRootPath, true);
+				self::cfg(self::$environment->config);
 			}
+			$errorReporting = self::cfg()->Error->error_reporting;
+			if ($errorReporting) error_reporting($errorReporting);
 			// autoloader
 			spl_autoload_register('Gongo_App::autoload');
 			// preload
@@ -106,12 +110,12 @@ class Gongo_App extends Gongo_App_Base
 	{
 		return $obj->init($this);
 	}
-	
+
 	public function afterInitConfig($obj)
 	{
 		return $obj->_(self::cfg()->_());
 	}
-	
+
 	protected function initializeErrorHandler()
 	{
 		self::cfg() && self::cfg()->Error->use_error_handler(true) and set_error_handler(
@@ -316,14 +320,14 @@ class Gongo_App extends Gongo_App_Base
 	{
 		return $this->env()->log->add($text);
 	}
-	
+
 	public function basepath($path = null)
 	{
 		if (is_null($path)) return $this->basepath;
 		$this->basepath = $path;
 		return $this;
 	}
-	
+
 	public function path($query = null, $args = null, $action = null, $basepath = null, $type = 0, $short = false)
 	{
 		return $this->dispatcher->path($this, $query, $args, $action, $basepath, $type, $short);

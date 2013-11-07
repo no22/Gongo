@@ -2,34 +2,34 @@
 class Gongo_App_Path extends Gongo_Component_Container
 {
 	public $root;
-	
+
 	function __construct($root)
 	{
 		$this->root = $root;
 	}
-	
+
 	function _app()
 	{
 		return $this->root . Gongo_File_Path::make('/app');
 	}
-	
+
 	function _temp()
 	{
 		$path = $this->root . Gongo_File_Path::make('/work');
 		Gongo_File::makeDir($path);
 		return $path;
 	}
-	
+
 	function _sessionSavePath($path)
 	{
 		return $this->root . Gongo_File_Path::make($path);
 	}
-	
+
 	function _template()
 	{
 		return $this->root . Gongo_File_Path::make('/template');
 	}
-	
+
 	function _config()
 	{
 		return $this->root . Gongo_File_Path::make('/config');
@@ -52,6 +52,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 
 	function _log()
 	{
+		if (!$this->temp) return false;
 		$path = $this->temp . Gongo_File_Path::make('/logs');
 		Gongo_File::makeDir($path);
 		return $path;
@@ -59,11 +60,13 @@ class Gongo_App_Path extends Gongo_Component_Container
 
 	function _logFile()
 	{
+		if (!$this->log) return false;
 		return $this->log . Gongo_File_Path::make('/log_' . date('Y-m-d') . '.txt');
 	}
 
 	function _sqlLogFile()
 	{
+		if (!$this->log) return false;
 		return $this->log . Gongo_File_Path::make('/sqllog_' . date('Y-m-d') . '.txt');
 	}
 
@@ -76,12 +79,12 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		return $this->webapp . Gongo_File_Path::make('/lib');
 	}
-	
+
 	function _home()
 	{
 		return dirname($this->webapp);
 	}
-	
+
 	function _htmlPath()
 	{
 		return Gongo_Locator::get('Gongo_App_Path_DocumentRoot', $this);
@@ -106,7 +109,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		return $this->htmlPath->img;
 	}
-	
+
 	function _domain()
 	{
 		return isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '' ;
@@ -117,11 +120,11 @@ class Gongo_App_Path extends Gongo_Component_Container
 		return isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != 80 ? ':' . $_SERVER['SERVER_PORT'] : '' ;
 	}
 
-	function _https() 
+	function _https()
 	{
 		return isset($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN);
 	}
-	
+
 
 	function _scheme()
 	{
@@ -144,7 +147,7 @@ class Gongo_App_Path extends Gongo_Component_Container
 		if ($port === ':443') $port = '';
 		return 'http://' . $httpHost . $port ;
 	}
-	
+
 	function _rootUrlHttps()
 	{
 		$httpHost = $this->domain;
@@ -153,16 +156,27 @@ class Gongo_App_Path extends Gongo_Component_Container
 		return 'https://' . $httpHost . $port ;
 	}
 
+	function _originalRequestPath()
+	{
+		return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+	}
+
 	function _requestPath()
 	{
-		$path = isset($_GET['__url__']) ? $_GET['__url__'] : '' ;
-		if ($path != '' && !Gongo_Str::startsWith($path, '/')) $path = '/' . $path;
+		if (isset($_SERVER['GONGO_MOUNT_POINT'])) {
+			$mountPoint = $_SERVER['GONGO_MOUNT_POINT'];
+			$path = substr($this->originalRequestPath, strlen($mountPoint));
+			if ($path === '/') $path = '';
+		} else {
+			$path = isset($_GET['__url__']) ? $_GET['__url__'] : '' ;
+			if ($path != '' && !Gongo_Str::startsWith($path, '/')) $path = '/' . $path;
+		}
 		return $path;
 	}
 
 	function _mountPoint()
 	{
-		list($reqUrl) = explode('?',$_SERVER['REQUEST_URI']);
+		$reqUrl = $this->originalRequestPath;
 		if ($reqUrl == '/index.php' && $this->requestPath == '') {
 			$this->requestPath = 'index.php' ;
 			$mountPoint = '';
@@ -178,12 +192,12 @@ class Gongo_App_Path extends Gongo_Component_Container
 	{
 		return Gongo_Str::startsWith($this->requestPath, '/') ? $this->requestPath : '/' . $this->requestPath ;
 	}
-	
+
 	function _smarty2()
 	{
 		return Gongo_Locator::get('Gongo_App_Path_Smarty2', $this);
 	}
-	
+
 	function _smarty3()
 	{
 		return Gongo_Locator::get('Gongo_App_Path_Smarty3', $this);

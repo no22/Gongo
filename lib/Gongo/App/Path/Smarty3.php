@@ -2,14 +2,14 @@
 class Gongo_App_Path_Smarty3 extends Gongo_Component_Container
 {
 	protected $path;
-	
+
 	function __construct($path)
 	{
 		$this->path = $path;
 		Gongo_Locator::load($this->libraryPath ,'Smarty');
 		Smarty::muteExpectedErrors();
 	}
-	
+
 	function _libraryPath()
 	{
 		return $this->path->lib . Gongo_File_Path::make('/smarty3/Smarty.class.php');
@@ -27,6 +27,7 @@ class Gongo_App_Path_Smarty3 extends Gongo_Component_Container
 
 	function _cachePath()
 	{
+		if (!$this->path->temp) return false;
 		$path = $this->path->temp . Gongo_File_Path::make('/smarty3/cache/');
 		Gongo_File::makeDir($path);
 		return $path;
@@ -34,6 +35,7 @@ class Gongo_App_Path_Smarty3 extends Gongo_Component_Container
 
 	function _compiledTemplatePath()
 	{
+		if (!$this->path->temp) return false;
 		$path = $this->path->temp . Gongo_File_Path::make('/smarty3/templates_c/');
 		Gongo_File::makeDir($path);
 		return $path;

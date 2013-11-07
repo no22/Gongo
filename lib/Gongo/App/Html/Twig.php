@@ -28,7 +28,9 @@ class Gongo_App_Html_Twig extends Gongo_App_Html_AbstractTemplate
 	public function initTwigRenderer($twig)
 	{
 		$twig->setLoader($this->loader);
-		$twig->setCache(substr(Gongo_App::$environment->path->twig->cachePath, 0, -1));
+		$cachePath = Gongo_App::$environment->path->twig->cachePath;
+		$cachePath = $cachePath ? substr($cachePath, 0, -1) : false ;
+		$twig->setCache($cachePath);
 		if (Gongo_App::$environment->development) {
 			$twig->enableAutoReload();
 		}
