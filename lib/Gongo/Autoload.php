@@ -62,6 +62,19 @@ if (!defined('PHP_VERSION_ID')) {
 	define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
 }
 
+if (!function_exists('getallheaders')) {
+	function getallheaders()
+	{
+		$headers = array();
+		foreach($_SERVER as $k => $v) {
+			if (substr($k, 0, 5) == 'HTTP_') {
+				$headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($k, 5)))))] = $v;
+			}
+		}
+		return $headers;
+	}
+}
+
 if (!function_exists('quote')) {
     function quote($obj) { return Gongo_Fn::quote($obj); }
 }

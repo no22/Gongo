@@ -5,19 +5,19 @@ class Gongo_App_Auth_Digest extends Gongo_App_Auth_Base
 		'-message' => 'Please Enter Your Password',
 		'-regenerateSessionId' => false,
 	);
-	
+
 	public function outputHeader()
 	{
-		header('WWW-Authenticate: Digest realm="' . $this->options->message . 
-			'", nonce="' . uniqid() . '", qop="auth", opaque="' . 
+		header('WWW-Authenticate: Digest realm="' . $this->options->message .
+			'", nonce="' . uniqid() . '", qop="auth", opaque="' .
 			md5($this->options->message) . '"'
 		);
 	}
-	
+
 	public function httpDigestParse($text)
 	{
 		$needed = array(
-			'nonce' => 1, 'nc' => 1, 'cnonce' => 1, 'qop' => 1, 
+			'nonce' => 1, 'nc' => 1, 'cnonce' => 1, 'qop' => 1,
 			'username' => 1, 'uri' => 1, 'response' => 1
 		);
 		$data = array();
@@ -29,7 +29,7 @@ class Gongo_App_Auth_Digest extends Gongo_App_Auth_Base
 		}
 		return $needed ? false : $data ;
 	}
-	
+
 	public function authenticate($app, $callback)
 	{
 		if (!$app->server->PHP_AUTH_DIGEST) {
