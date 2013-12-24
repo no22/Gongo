@@ -57,23 +57,13 @@ class Gongo_App_Mapper_Habtm extends Gongo_App_Mapper
 
 	public function prepareFindAllQuery($subject, $subjectId, $col, $seq = null, $qcol = null)
 	{
+		$query = is_null($qcol) ? $this->q() : $qcol ;
 		$subjectKey = $this->identifier($this->foreignKey($subject));
 		$fromTableAlias = $this->identifier($this->options->defaultTableAlias);
-		$query = $this->q(array('id' => $col . '.id'), true);
-		$query->where("{$fromTableAlias}.{$subjectKey} = :__subjectId__");
+		$query->ifields($col . '.id AS id')->where("{$fromTableAlias}.{$subjectKey} = :__subjectId__");
 		$query->bind(array(':__subjectId__' => $subjectId));
 		if ($seq) $query->orderBy($seq);
 		return $query;
-/*		
-		$query = $this->join(array($col), $qcol, true);
-		$colKey = $this->identifier($this->foreignKey($col));
-		$subjectKey = $this->identifier($this->foreignKey($subject));
-		$fromTableAlias = $this->identifier($this->options->defaultTableAlias);
-		$query->select("{$fromTableAlias}.{$colKey} AS id")->where("{$fromTableAlias}.{$subjectKey} = :__subjectId__");
-		$query->bind(array(':__subjectId__' => $subjectId));
-		if ($seq) $query->orderBy($seq);
-		return $query;
-*/
 	}
 	
 	public function findAll($subject, $subjectId, $col, $seq = null, $q = null, $qcol = null, $mapper = null)

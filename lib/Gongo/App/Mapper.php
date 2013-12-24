@@ -18,6 +18,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		'-tablePrefix' => '',
 		'-useSqlLog' => false,
 		'-defaultTableAlias' => 't',
+		'-strict' => null,
 	);
 
 	function __construct($options = array())
@@ -38,6 +39,9 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		$obj->createdDateColumn($this->options->createdDateColumn);
 		$obj->modifiedDateColumn($this->options->modifiedDateColumn);
 		$obj->joinMapper($this);
+		if (!is_null($this->options->strict)) {
+			$obj->strict($this->options->strict);
+		}
 		return $obj;
 	}
 
