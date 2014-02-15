@@ -191,7 +191,7 @@ class Gongo_App extends Gongo_App_Base
 		$path = is_null($path) ? '' : $path ;
 		if (is_null($this->root)) {
 			$this->basepath($path);
-			$this->url->initRoute($this, $this->uses, $path, array());
+			$this->url->initRoute($this, $this->componentClasses(), $path, array());
 			if (self::cfg()->Dispatcher->use_dispatcher(true)) {
 				$this->dispatcher->initContoroller($this, $this, '', array());
 			}
