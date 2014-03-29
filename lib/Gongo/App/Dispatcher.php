@@ -14,7 +14,7 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 	public $currentExtension = null;
 	public $currentArgs = null;
 	public $currentArgMaps = array();
-	
+
 	public $uses = array(
 		'converter' => 'Gongo_Str_CaseConvert',
 		'-submitRegex' => '/^-(\w+)-$/',
@@ -26,12 +26,12 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 		'-useExtension' => true,
 		'-extension' => 'html',
 	);
-	
+
 	public function actionName()
 	{
 		return $this->actionName;
 	}
-	
+
 	public function methodName()
 	{
 		return $this->methodName;
@@ -80,11 +80,11 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 
 	public function initContoroller($app, $controller, $basepath = '', $conditions = array())
 	{
-		$app->http('*', $basepath . '/:__action__:__args__', 
+		$app->http('*', $basepath . '/:__action__:__args__',
 			$this->_executeController($app, $controller, array()),
 			$conditions + array('__action__' => '\w+', '__args__' => '[^?]*')
 		);
-		$app->http('*', $basepath . '/', 
+		$app->http('*', $basepath . '/',
 			$this->_executeIndexController($app, $controller, array()),
 			$conditions
 		);
@@ -93,16 +93,16 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 
 	public function beforeAction($app, $method, $callback, $path = '', $conditions = array(), $action = '\w+')
 	{
-		$app->before($method, "{$path}/:__action__:__args__", 
+		$app->before($method, "{$path}/:__action__:__args__",
 			$callback,
 			$conditions + array('__action__' => $action, '__args__' => '[^?]*')
 		);
 		return $this;
 	}
-	
+
 	public function afterAction($app, $method, $callback, $path = '', $conditions = array(), $action = '\w+')
 	{
-		$app->after($method, "{$path}/:__action__:__args__", 
+		$app->after($method, "{$path}/:__action__:__args__",
 			$callback,
 			$conditions + array('__action__' => $action, '__args__' => '[^?]*')
 		);
@@ -111,19 +111,19 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 
 	public function aroundAction($app, $method, $callback, $path = '', $conditions = array(), $action = '\w+')
 	{
-		$app->around($method, "{$path}/:__action__:__args__", 
+		$app->around($method, "{$path}/:__action__:__args__",
 			$callback,
 			$conditions + array('__action__' => $action, '__args__' => '[^?]*')
 		);
 		return $this;
 	}
-	
+
 	public function makeControllerClassName($module, $controller, $secure)
 	{
 		$this->moduleName = Gongo_Str::snakeToPascal($module);
 		$this->controllerName = Gongo_Str::snakeToPascal($controller);
 		$this->https = $secure;
-		return strtr($this->options->controllerClass, 
+		return strtr($this->options->controllerClass,
 			array(
 				':module' => $this->moduleName,
 				':controller' => $this->controllerName,
@@ -137,7 +137,7 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 		$appPath = Gongo_App::$environment->path->app;
 		return $appPath . Gongo_File_Path::make('/' . strtr($className, array('_' => '/'))) . '.php';
 	}
-	
+
 	public function makeSubmitButtonName($request)
 	{
 		$submitRegex = $this->options->submitRegex;
@@ -151,13 +151,13 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 		}
 		return '';
 	}
-	
+
 	public function submitName($request = null)
 	{
 		if (is_null($request)) return $this->submitName;
 		return $this->makeSubmitButtonName($request);
 	}
-	
+
 	public function makeControllerMethodName($action, $method, $request)
 	{
 		$method = strtolower($method);
@@ -175,7 +175,7 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 		$methodName = $this->makeControllerMethodName($action, $method, $request);
 		return array($className, $classPath, $methodName);
 	}
-	
+
 	public function executeController($app, $controller, $e = array())
 	{
 		$eAction = isset($e['action']) ? $e['action'] : $app->args->__action__ ;
@@ -191,7 +191,7 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 
 		$this->currentAction = $eAction;
 		$methodName = $this->makeControllerMethodName($eAction, $eMethod, $eRequest);
-		
+
 		if ($this->buttonName) {
 			if ($eMethod === 'get') {
 				unset($app->get->{$this->buttonName});
@@ -212,7 +212,7 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 			$this->currentExtension = $m[1];
 		}
 		$this->currentArgs = $argStr;
-		
+
 		$sep = $this->options->argSeparator;
 		$refl = new ReflectionMethod($controller, $methodName);
 		$numOfRequiredParams = $refl->getNumberOfRequiredParameters();
@@ -223,12 +223,12 @@ class Gongo_App_Dispatcher extends Gongo_App_Base
 		}
 
 		if (!Gongo_Str::startsWith($argStr, $sep)) return $app->error('404');
-		
+
 		$argArr = array_map('urldecode', explode($sep, substr($argStr, 1)));
 		$args = array_merge(array($app), $argArr);
-		
+
 		if (count($args) < $numOfRequiredParams) return $app->error('404');
-		
+
 		foreach ($refl->getParameters() as $p) {
 			$pos = $p->getPosition();
 			if ($pos !== 0) {

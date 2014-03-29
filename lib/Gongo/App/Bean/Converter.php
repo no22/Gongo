@@ -7,10 +7,13 @@ class Gongo_App_Bean_Converter extends Gongo_App_Base
 		'-fields' => null,
 		'-enable' => null,
 		'-disable' => null,
-		'-arrayFilter' => false, 
-		'-currentArrayFilter' => false, 
+		'-arrayFilter' => false,
+		'-currentArrayFilter' => false,
 		'-functions' => array(
 			'trim', 'ltrim', 'rtrim', 'md5', 'sha1', 'nl2br', 'mb_convert_kana',
+			'intval', 'strval', 'floatval', 'strtoupper', 'strtolower',
+			'bin2hex', 'hex2bin','convert_uudecode', 'convert_uuencode',
+			'strip_tags', 'ucfirst', 'ucwords',
 		),
 		'-unset' => false,
 		'-break' => false,
@@ -113,7 +116,7 @@ class Gongo_App_Bean_Converter extends Gongo_App_Base
 	{
 		$this->options->break = $break;
 	}
-	
+
 	protected function unsetAttr($dst, $key, $break = true)
 	{
 		unset($dst->{$key});
@@ -121,7 +124,7 @@ class Gongo_App_Bean_Converter extends Gongo_App_Base
 		$this->breakProcess($break);
 		return null;
 	}
-	
+
 	public function identity($value)
 	{
 		return $value;
@@ -184,12 +187,12 @@ class Gongo_App_Bean_Converter extends Gongo_App_Base
 	{
 		return mb_convert_kana($value, 'k');
 	}
-	
+
 	public function zenkaku($value)
 	{
 		return mb_convert_kana($value, 'AS');
 	}
-	
+
 	public function hankaku($value)
 	{
 		return mb_convert_kana($value, 'as');

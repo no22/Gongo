@@ -11,6 +11,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		'-pk' => 'id',
 		'-entityClass' => 'Gongo_Bean',
 		'-namedScopes' => array(),
+		'-tableAlias' => array(),
 		'-autoPopulate' => true,
 		'-createdDateColumn' => 'created',
 		'-modifiedDateColumn' => 'modified',
@@ -35,6 +36,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		$obj->entityClass($this->options->entityClass);
 		$obj->primaryKey($this->options->pk);
 		$obj->namedScopes($this->options->namedScopes);
+		$obj->tableAlias($this->options->tableAlias);
 		$obj->autoPopulate($this->options->autoPopulate);
 		$obj->createdDateColumn($this->options->createdDateColumn);
 		$obj->modifiedDateColumn($this->options->modifiedDateColumn);
@@ -59,7 +61,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		}
 		return $obj;
 	}
-		
+
 	function finder($fields = null, $inner = false) { return $this->query($fields, $inner); }
 	function q($fields = null, $inner = false) { return $this->query($fields, $inner); }
 	function select($fields = null, $inner = false) { return $this->query($fields, $inner); }
@@ -69,11 +71,16 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		return $this->mapper->query($fields, $inner);
 	}
 
-	function identifier($str) 
+	function identifier($str)
 	{
 		return $this->mapper->identifier($str);
 	}
-	
+
+	function tableName()
+	{
+		return $this->mapper->tableName();
+	}
+
 	function insert($bean, $q = null)
 	{
 		return $this->mapper->insert($bean, $q);
@@ -83,7 +90,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 	{
 		return $this->mapper->update($bean, $q, $returnRowCount);
 	}
-	
+
 	function save($bean, $q = null)
 	{
 		return $this->mapper->save($bean, $q);
@@ -104,15 +111,15 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		return $key . '_id';
 	}
 
-	function getRelationMapper($key) 
+	function getRelationMapper($key)
 	{
 		return $this->relation->{$key};
 	}
 
-	function join($keys, $q = null, $inner = false) 
+	function join($keys, $q = null, $inner = false)
 	{
 		$q = is_null($q) ? $this->q() : $q ;
-		$fromTable = $this->identifier($this->options->table);
+		$fromTable = $this->identifier($this->tableName());
 		$fromAlias = $this->identifier($this->options->defaultTableAlias);
 		$q->from($fromTable . " AS {$fromAlias}");
 		foreach ($keys as $key => $obj) {
@@ -125,7 +132,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 				}
 				$relMapper = $obj;
 			}
-			$joinTable = $this->identifier($relMapper->options->table);
+			$joinTable = $this->identifier($relMapper->tableName());
 			$joinAlias = $this->identifier($key);
 			$pk = $this->identifier($relMapper->options->pk);
 			$fkey = $this->identifier($this->foreignKey($key));
@@ -137,17 +144,17 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		}
 		return $q;
 	}
-	
+
 	function beginTransaction()
 	{
 		return $this->mapper->beginTransaction();
 	}
-	
+
 	function commit()
 	{
 		return $this->mapper->commit();
 	}
-	
+
 	function rollBack()
 	{
 		return $this->mapper->rollBack();
@@ -157,7 +164,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 	{
 		return $this->mapper->pdo();
 	}
-	
+
 	function newBean($data, $bean = null)
 	{
 		$bean = is_null($bean) ? $this->emptyBean() : $bean ;
@@ -176,17 +183,17 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		return $bean->__();
 	}
 
-	function readBean($app, $id, $q = null) 
+	function readBean($app, $id, $q = null)
 	{
 		return $id ? $this->get($id, $q, true) : $this->get() ;
 	}
 
-	function writeBean($app, $bean, $q = null) 
+	function writeBean($app, $bean, $q = null)
 	{
 		return $this->save($bean, $q);
 	}
 
-	function deleteBean($app, $id, $q = null, $returnRowCount = false) 
+	function deleteBean($app, $id, $q = null, $returnRowCount = false)
 	{
 		return $this->delete($id, $q, $returnRowCount);
 	}

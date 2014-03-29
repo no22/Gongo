@@ -29,6 +29,7 @@ class Gongo_App_Ajax extends Gongo_App_Base
 
 	function setExtensions($app, $dispatcher = null)
 	{
+		if (!$this->isValidRequest($app)) $app->error('403');
 		$dispatcher = is_null($dispatcher) ? $app->dispatcher : $dispatcher ;
 		$dispatcher->allowedExtensions($this->options->extension);
 		$this->dispatcher = $dispatcher;
@@ -47,8 +48,8 @@ class Gongo_App_Ajax extends Gongo_App_Base
 		}
 		return $ext;
 	}
-	
-	function header($ext = 'json', $charset = 'utf-8') 
+
+	function header($ext = 'json', $charset = 'utf-8')
 	{
 		header('X-Content-Type-Options: nosniff');
 		if ($this->options->allowOrigin) {
@@ -67,13 +68,13 @@ class Gongo_App_Ajax extends Gongo_App_Base
 		header("Content-type: {$mime}; charset={$charset}");
 	}
 
-	function encodeJson($data) 
+	function encodeJson($data)
 	{
 		if (!$this->json) return json_encode($data);
 		return $this->json->encode($data);
 	}
-	
-	function encodeJsonp($data, $callback) 
+
+	function encodeJsonp($data, $callback)
 	{
 		$encoded = $this->encodeJson($data);
 		return $callback . '(' . $encoded . ')';
@@ -88,13 +89,13 @@ class Gongo_App_Ajax extends Gongo_App_Base
 	{
 		return print_r($data, true);
 	}
-	
-	function encodeXml($data, $root) 
+
+	function encodeXml($data, $root)
 	{
 		$root = $root ? $root : 'root' ;
 		return $this->xml->encode($data, $root);
 	}
-	
+
 	function encode($data, $ext = 'json', $text = null)
 	{
 		$ext = strpos($ext, '.') === 0 ? substr($ext, 1) : $ext ;
@@ -112,7 +113,7 @@ class Gongo_App_Ajax extends Gongo_App_Base
 		}
 		$origin = $app->server->HTTP_ORIGIN;
 		$allowedOrigin = $this->options->allowedOrigin;
-		$host = $app->server->HTTP_HOST;
+		$host = $app->env()->path->rootUrl;
 		if (!$origin) return true;
 		if (!$allowedOrigin) {
 			if ($this->options->useHttpHost) return $host === $origin;
@@ -123,7 +124,6 @@ class Gongo_App_Ajax extends Gongo_App_Base
 
 	function response($app, $data, $ext = null, $text = null)
 	{
-		if (!$this->isValidRequest($app)) $app->error('403');
 		$ext = strtolower($this->getExtension($ext));
 		$ext = strpos($ext, '.') === 0 ? substr($ext, 1) : $ext ;
 		if ($ext === 'xml') {
