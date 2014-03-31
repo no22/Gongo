@@ -28,7 +28,7 @@ class Gongo_App_DB_PDO_Builder
 		$options = array();
 		if (strpos($dsn, 'mysql') === 0 && PHP_VERSION_ID < 50306) {
 			if (is_null($charset)) {
-				if (preg_match('/charset\s*=\s*([\w+])/i', $dsn, $m)) {
+				if (preg_match('/charset\s*=\s*(\w+)/i', $dsn, $m)) {
 					$charset = $m[1];
 				}
 				$charset = is_null($charset) ? 'utf8' : $charset ;
