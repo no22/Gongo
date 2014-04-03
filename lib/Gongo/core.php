@@ -906,6 +906,16 @@ class Gongo_App_Path extends Gongo_Component_Container
 		return $this->htmlPath->html;
 	}
 
+	function _assets()
+	{
+		return $this->htmlPath->assets;
+	}
+
+	function _themes()
+	{
+		return $this->htmlPath->themes;
+	}
+
 	function _css()
 	{
 		return $this->htmlPath->css;
