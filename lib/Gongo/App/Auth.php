@@ -20,7 +20,7 @@ class Gongo_App_Auth extends Gongo_App_Auth_Base
 		return strpos($url, $app->replacePathArgs($this->options->login), 0) === 0;
 	}
 	
-	public function isValid($app)
+	public function isValid($app = null)
 	{
 		$loginUser = $this->readLoginUser($app);
 		$this->isValid = !empty($loginUser);

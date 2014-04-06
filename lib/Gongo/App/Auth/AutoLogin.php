@@ -73,7 +73,7 @@ class Gongo_App_Auth_AutoLogin extends Gongo_App_Auth
 		return $this->userProxy->erasePassport($app, $this, $user);
 	}
 	
-	public function isValid($app)
+	public function isValid($app = null)
 	{
 		$user = $this->readLoginUser($app);
 		$this->isValid = !empty($user);
