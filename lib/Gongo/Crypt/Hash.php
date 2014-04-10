@@ -1,12 +1,12 @@
 <?php
 class Gongo_Crypt_Hash extends Gongo_Crypt_Base
 {
-	protected $algo = 'tiger128,3';
+	protected $algo = 'sha512';
 	
-	function __construct($salt = '', $algo = 'tiger128,3')
+	function __construct($salt = null, $algo = null)
 	{
-		$this->salt($salt);
-		$this->algo($algo);
+		if (!is_null($salt)) $this->salt($salt);
+		if (!is_null($algo)) $this->algo($algo);
 	}
 
 	function algo($value = null)

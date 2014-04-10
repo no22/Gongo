@@ -1,23 +1,25 @@
 <?php
-class Gongo_Crypt_HashHmac extends Gongo_Crypt_Base
+class Gongo_Crypt_HashHmac extends Gongo_Crypt_Hash
 {
-	protected $algo = 'tiger128,3';
+	protected $key = "";
 	
-	function __construct($salt = '', $algo = 'tiger128,3')
+	function __construct($salt = null, $algo = null, $key = null)
 	{
-		$this->salt($salt);
-		$this->algo($algo);
+		if (!is_null($salt)) $this->salt($salt);
+		if (!is_null($algo)) $this->algo($algo);
+		if (!is_null($key)) $this->key($key);
 	}
 
-	function algo($value = null)
+	function key($value = null)
 	{
-		if (is_null($value)) return $this->algo;
-		$this->algo = $value;
+		if (is_null($value)) return $this->key;
+		$this->key = $value;
 		return $this;
 	}
 	
-	function hash($text, $salt = '', $raw = false)
+	function hash($text, $salt = '', $key = '', $raw = false)
 	{
-		return hash_hmac($this->algo(), $text . $salt, $this->salt(), $raw);
+		$key = $key ? $key : $this->key() ;
+		return hash_hmac($this->algo(), $text . $salt . $this->salt(), $key, $raw);
 	}
 }
