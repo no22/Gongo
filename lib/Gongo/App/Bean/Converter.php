@@ -162,6 +162,21 @@ class Gongo_App_Bean_Converter extends Gongo_App_Base
 		return $value ? $value : null ;
 	}
 
+	public function emptyIfNull($value)
+	{
+		return is_null($value) ? '' : $value ;
+	}
+
+	public function zeroIfEmpty($value)
+	{
+		return $value ? $value : 0 ;
+	}
+
+	public function emptyIfZero($value)
+	{
+		return $value == 0 ? '' : $value ;
+	}
+
 	public function unsetIfEmptyHandler($current, $src, $dst, $key, $params = null)
 	{
 		if ($current) return $current;

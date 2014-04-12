@@ -22,6 +22,17 @@ class Gongo_App_Paginator_ViewHelper extends Gongo_App_Base
 		$this->app = $value;
 		return $this;
 	}
+
+	function context($key = null)
+	{
+		if (is_null($key)) return $this->paginator()->context;
+		return $this->paginator()->context->{$key};
+	}
+
+	function existsContext($key, $value)
+	{
+		return in_array($value, $this->paginator()->context->{$key});
+	}
 	
 	function count($value = null)
 	{
