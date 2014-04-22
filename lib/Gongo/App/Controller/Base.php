@@ -7,6 +7,7 @@ class Gongo_App_Controller_Base extends Gongo_App_Base
 		'-basepath' => null,
 		'-conditions' => null,
 		'-view' => null,
+		'viewContext' => 'Gongo_Bean',
 	);
 
 	function initBeforeAction($app, $method, $dispatcher, $callback, $actions, $flag = true)
@@ -59,6 +60,7 @@ class Gongo_App_Controller_Base extends Gongo_App_Base
 
 	function beforeFilter($app)
 	{
+		$this->viewContext->basePath = $this->basepath();
 	}
 
 	function basepath()
@@ -74,6 +76,7 @@ class Gongo_App_Controller_Base extends Gongo_App_Base
 	function render($app, $template, $context = array())
 	{
 		$view = $this->view($app);
+		$context = array_merge($this->viewContext->_(), $context);
 		return $view->render($app, $this->options->view . $template, $context);
 	}
 

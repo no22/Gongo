@@ -66,11 +66,11 @@ class Gongo_App_Controller extends Gongo_App_Controller_Base
 
 	function beforeFilter($app)
 	{
-		$view = $this->view($app);
+		parent::beforeFilter($app);
 		if ($this->__token) {
-			$view->context->token = $this->token->token();
+			$this->viewContext->token = $this->token->token();
 		}
-		$view->context->controllerId = $this->options->id;
+		$this->viewContext->controllerId = $this->options->id;
 	}
 
 	function tokenError($app)
