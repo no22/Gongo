@@ -11,7 +11,7 @@ class Gongo_App_Controller_CRUDBase extends Gongo_App_Controller
 		'validator' => array(
 			'Gongo_App_Validator',
 			array(
-				'-redirect' => null, 
+				'-redirect' => null,
 				'-rules' => array(
 				),
 			),

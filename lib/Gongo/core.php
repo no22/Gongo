@@ -1,7 +1,7 @@
 <?php
 /**********************************************************************
     Gongo Framework Core
-    Written by Hiroyuki OHARA (c) copyright 2011-2013
+    Written by Hiroyuki OHARA (c) copyright 2011-2014
     Gongo is dual Licensed MIT and GPLv3. You may choose the 
     license that fits best for your project.
 **********************************************************************/
@@ -1555,6 +1555,7 @@ class Gongo_App_Controller_Base extends Gongo_App_Base
 		'-basepath' => null,
 		'-conditions' => null,
 		'-view' => null,
+		'viewContext' => 'Gongo_Bean',
 	);
 
 	function initBeforeAction($app, $method, $dispatcher, $callback, $actions, $flag = true)
@@ -1607,6 +1608,7 @@ class Gongo_App_Controller_Base extends Gongo_App_Base
 
 	function beforeFilter($app)
 	{
+		$this->viewContext->basePath = $this->basepath();
 	}
 
 	function basepath()
@@ -1622,6 +1624,7 @@ class Gongo_App_Controller_Base extends Gongo_App_Base
 	function render($app, $template, $context = array())
 	{
 		$view = $this->view($app);
+		$context = array_merge($this->viewContext->_(), $context);
 		return $view->render($app, $this->options->view . $template, $context);
 	}
 
@@ -1698,11 +1701,11 @@ class Gongo_App_Controller extends Gongo_App_Controller_Base
 
 	function beforeFilter($app)
 	{
-		$view = $this->view($app);
+		parent::beforeFilter($app);
 		if ($this->__token) {
-			$view->context->token = $this->token->token();
+			$this->viewContext->token = $this->token->token();
 		}
-		$view->context->controllerId = $this->options->id;
+		$this->viewContext->controllerId = $this->options->id;
 	}
 
 	function tokenError($app)
@@ -2046,13 +2049,13 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 		$mountPoint = $this->options->mountPoint;
 		$this->requestMethod = $app->server->REQUEST_METHOD;
 		$this->serverReqUri = $app->server->REQUEST_URI;
-		$this->requestUrl = str_replace($mountPoint, '', $this->serverReqUri);
+		$this->requestUrl = substr($this->serverReqUri, strlen($mountPoint));
 		return $this;
 	}
 
 	public function match($httpMethod, $url, $conditions=array(), $mountPoint = null)
 	{
-		$requestUri = is_null($mountPoint) ? $this->requestUrl : str_replace($mountPoint, '', $this->serverReqUri) ;
+		$requestUri = is_null($mountPoint) ? $this->requestUrl : substr($this->serverReqUri, strlen($mountPoint)) ;
 		$requestMethod = $this->requestMethod;
 		$this->method = strtoupper($httpMethod);
 		$this->url = $url;
@@ -2123,7 +2126,7 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 		return http_build_query($aQuery, $prefix , $sep);
 	}
 
-	public function replaceQueryArgs($url = null, $newQuery = array(), $hash = null, $shortUrl = true) 
+	public function replaceQueryArgs($url = null, $newQuery = array(), $hash = null, $shortUrl = true)
 	{
 		if (is_null($url)) return $this->requestUrl;
 		$existsQueryTag = strpos($url, '??') !== false;
@@ -2179,7 +2182,7 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 		}
 		return $this->replaceQueryArgs($path, $qargs, $hash, $shortUrl);
 	}
-	
+
 	public function requestUrl($query = false)
 	{
 		return $query ? $this->requestUrl : Gongo_App::$environment->path->requestUrl ;
