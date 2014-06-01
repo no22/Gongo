@@ -122,9 +122,9 @@ class Gongo_App_Validator extends Gongo_App_Base
 		$mData = $this->postData($app, $mData);
 		$actions = is_string($this->options->action) ? array_filter(array_map('trim', explode(',', $this->options->action))) : $this->options->action ;
 		$action = strtolower($app->dispatcher->submitName($mData));
-		
+
 		if (!$action || !in_array($action, $actions)) return;
-		
+
 		if (is_null($this->options->redirect)) {
 			$this->options->redirect = $app->url->requestUrl;
 		}
@@ -160,7 +160,7 @@ class Gongo_App_Validator extends Gongo_App_Base
 		$result = isset($aData[$key]) ? call_user_func($callback, $aData[$key], $rule['params']) : false ;
 		return $result ? null : array('tag' => $rule['tag'], 'message' => $rule['message']) ;
 	}
-	
+
 	public function required($value, $params)
 	{
 		return true;
@@ -206,6 +206,15 @@ class Gongo_App_Validator extends Gongo_App_Base
 	{
 		$value = isset($aData[$key]) ? $aData[$key] : '' ;
 		if (preg_match($rule['params'], $value)) {
+			return null;
+		}
+		return array('tag' => $rule['tag'], 'message' => $rule['message']);
+	}
+
+	public function notMatchHandler($aData, $key, $rule)
+	{
+		$value = isset($aData[$key]) ? $aData[$key] : '' ;
+		if (!preg_match($rule['params'], $value)) {
 			return null;
 		}
 		return array('tag' => $rule['tag'], 'message' => $rule['message']);
@@ -260,10 +269,10 @@ class Gongo_App_Validator extends Gongo_App_Base
 	{
 		return strtotime($value) !== false;
 	}
-	
+
 	public function dateYMD($value, $params)
 	{
-		$ymd = strtr($value, array('-'=>'', '/'=>'', '.'=>''));		
+		$ymd = strtr($value, array('-'=>'', '/'=>'', '.'=>''));
 		if (strlen($ymd) === 8) {
 			$y = substr($ymd, 0, 4);
 			$m = substr($ymd, 4, 2);
@@ -340,6 +349,29 @@ class Gongo_App_Validator extends Gongo_App_Base
 			}
 		}
 		return array('tag' => $rule['tag'], 'message' => $rule['message']);
+	}
+
+	public function notHandler($aData, $key, $rule)
+	{
+		if (isset($aData[$key])) {
+			$formdata = $aData[$key];
+			foreach ($rule['params'] as $idx => $value) {
+				if (is_int($idx)) {
+					$r = array(
+						'tag' => $rule['tag'], 'type' => $value, 'params' => null, 'message' => $rule['message'],
+					);
+					$result = $this->execHandler($value, $aData, $key, $r);
+					if (is_null($result)) return array('tag' => $rule['tag'], 'message' => $rule['message']);
+				} else {
+					$r = array(
+						'tag' => $rule['tag'], 'type' => $idx, 'params' => $value, 'message' => $rule['message'],
+					);
+					$result = $this->execHandler($idx, $aData, $key, $r);
+					if (is_null($result)) return array('tag' => $rule['tag'], 'message' => $rule['message']);
+				}
+			}
+		}
+		return null;
 	}
 
 	public function email($value, $params = null)
