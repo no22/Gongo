@@ -59,8 +59,9 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 		return $this->match;
 	}
 
-	public function path($path, $short = false, $type = 0)
+	public function path($path = null, $short = false, $type = 0)
 	{
+		$path = (is_null($path) || $path === true) ? $this->requestUrl($path === true) : $path ;
 		$root = '';
 		if (!$short) {
 			if ($type === 0) $root = Gongo_App::$environment->path->rootUrl;

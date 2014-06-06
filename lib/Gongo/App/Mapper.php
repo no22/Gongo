@@ -116,33 +116,26 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		return $this->relation->{$key};
 	}
 
+	function defaultTableAlias($value = null)
+	{
+		if (is_null($value)) return $this->options->defaultTableAlias;
+		$this->options->defaultTableAlias = $value;
+		return $this;
+	}
+
+	function getRelationMapperInstance($class)
+	{
+		return Gongo_Locator::get($class);
+	}
+
+	function pkId($relMapper)
+	{
+		return $this->identifier($relMapper->options->pk);
+	}
+
 	function join($keys, $q = null, $inner = false)
 	{
-		$q = is_null($q) ? $this->q() : $q ;
-		$fromTable = $this->identifier($this->tableName());
-		$fromAlias = $this->identifier($this->options->defaultTableAlias);
-		$q->from($fromTable . " AS {$fromAlias}");
-		foreach ($keys as $key => $obj) {
-			if (is_int($key)) {
-				$relMapper = $this->getRelationMapper($obj);
-				$key = $obj;
-			} else {
-				if (is_string($obj)) {
-					$obj = Gongo_Locator::get($obj);
-				}
-				$relMapper = $obj;
-			}
-			$joinTable = $this->identifier($relMapper->tableName());
-			$joinAlias = $this->identifier($key);
-			$pk = $this->identifier($relMapper->options->pk);
-			$fkey = $this->identifier($this->foreignKey($key));
-			if ($inner) {
-				$q->innerJoin("{$joinTable} AS {$joinAlias} ON {$fromAlias}.{$fkey} = {$joinAlias}.{$pk}");
-			} else {
-				$q->join("{$joinTable} AS {$joinAlias} ON {$fromAlias}.{$fkey} = {$joinAlias}.{$pk}");
-			}
-		}
-		return $q;
+		return Gongo_Db_Mapper::joinHandler($this, $keys, $q, $inner);
 	}
 
 	function beginTransaction()
