@@ -25,7 +25,7 @@ class Gongo_App_Paginator extends Gongo_App_Base
 		$this->query = $value;
 		return $this;
 	}
-	
+
 	function pagingOffset()
 	{
 		$pagingSize = $this->context->pagingSize;
@@ -33,7 +33,7 @@ class Gongo_App_Paginator extends Gongo_App_Base
 		$offset = $pagingSize * $currentPage;
 		return array($offset, $pagingSize);
 	}
-	
+
 	function pagingColumn()
 	{
 		$columns = Gongo_Str::split($this->options->columns);
@@ -65,13 +65,13 @@ class Gongo_App_Paginator extends Gongo_App_Base
 		}
 		return $q;
 	}
-	
+
 	protected function escapeMetaChar($word)
 	{
 		$word = strtr($word, array('%' => '\%', '_' => '\_'));
 		return $word;
 	}
-	
+
 	function freeWordCondition($q, $word, $i, $columns)
 	{
 		$cond = array();
@@ -86,13 +86,13 @@ class Gongo_App_Paginator extends Gongo_App_Base
 		$q->where($cond)->bind($arg);
 		return $q;
 	}
-	
+
 	function conditions($q)
 	{
 		$q = $this->setSearchCondition($q);
 		return $q;
 	}
-	
+
 	function setLimit($q)
 	{
 		list($offset, $limit) = $this->pagingOffset();
@@ -124,14 +124,14 @@ class Gongo_App_Paginator extends Gongo_App_Base
 		$q = $this->setLimit($q);
 		return $q->all();
 	}
-	
+
 	function count($q = null)
 	{
 		$q = $this->defaultQuery($q);
 		$q = $this->conditions($q);
 		return $q->count();
 	}
-		
+
 	function paginate($app, $q = null, $mapper = null)
 	{
 		if (!is_null($q)) $this->query($q);
