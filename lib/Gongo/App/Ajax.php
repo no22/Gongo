@@ -58,7 +58,7 @@ class Gongo_App_Ajax extends Gongo_App_Base
 		if ($this->options->allowCredentials) {
 			header('Access-Control-Allow-Credentials: true');
 		}
-		$ext = strpos($ext, '.') === 0 ? substr($ext, 1) : $ext ;
+		$ext = $ext[0] === '.' ? substr($ext, 1) : $ext ;
 		if ($this->options->debug) {
 			header("Content-type: text/plain; charset={$charset}");
 			return;
@@ -98,7 +98,7 @@ class Gongo_App_Ajax extends Gongo_App_Base
 
 	function encode($data, $ext = 'json', $text = null)
 	{
-		$ext = strpos($ext, '.') === 0 ? substr($ext, 1) : $ext ;
+		$ext = $ext[0] === '.' ? substr($ext, 1) : $ext ;
 		if ($ext === 'json') return $this->encodeJson($data);
 		if ($ext === 'jsonp') return $this->encodeJsonp($data, $text);
 		if ($ext === 'php') return $this->encodePhp($data);
@@ -125,7 +125,7 @@ class Gongo_App_Ajax extends Gongo_App_Base
 	function response($app, $data, $ext = null, $text = null)
 	{
 		$ext = strtolower($this->getExtension($ext));
-		$ext = strpos($ext, '.') === 0 ? substr($ext, 1) : $ext ;
+		$ext = $ext[0] === '.' ? substr($ext, 1) : $ext ;
 		if ($ext === 'xml') {
 			$text = $text ? $text : $this->options->xml ;
 		} else if ($ext === 'jsonp') {

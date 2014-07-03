@@ -29,6 +29,11 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		$this->afterInit('db', $this->_afterInitDb());
 	}
 
+	function namedScopes($scopes = null)
+	{
+		return $this->options->namedScopes;
+	}
+
 	function afterInitMapper($obj)
 	{
 		$obj->db($this->db);

@@ -10,7 +10,7 @@ class Gongo_File
 		return $path;
 	}
 
-	static function dirSize($path, $readable = false) 
+	static function dirSize($path, $readable = false)
 	{
 		$option = $readable ? '-sh' : '-sb' ;
 		$result = exec('du ' . $option . ' ' . $path);
@@ -20,7 +20,7 @@ class Gongo_File
 		return false;
 	}
 
-	static function rmDir($path, $delete = true, $top = null) 
+	static function rmDir($path, $delete = true, $top = null)
 	{
 		$path = rtrim($path, DIRECTORY_SEPARATOR);
 		$top = is_null($top) ? $path : $top ;
@@ -40,12 +40,12 @@ class Gongo_File
 		return true;
 	}
 
-	static function mv($src, $dst) 
+	static function mv($src, $dst)
 	{
 		return rename($src, $dst);
 	}
 
-	static function rm($path, $terminate = true) 
+	static function rm($path, $terminate = true)
 	{
 		$path = is_array($path) ? $path : array($path) ;
 		foreach ($path as $file) {
@@ -73,7 +73,7 @@ class Gongo_File
 			$src = rtrim($src, DIRECTORY_SEPARATOR);
 			foreach (scandir($src) as $filename) {
 				if ($filename === '.' || $filename === '..') continue;
-				if (strpos($filename, '.') === 0) continue;
+				if ($filename[0] === '.') continue;
 				if (!self::cpDir($src . DIRECTORY_SEPARATOR . $filename, $dstpath, $overwrite)) $success = false;
 			}
 		}
@@ -95,20 +95,20 @@ class Gongo_File
 			$src = rtrim($src, DIRECTORY_SEPARATOR);
 			foreach (scandir($src) as $filename) {
 				if ($filename === '.' || $filename === '..') continue;
-				if (strpos($filename, '.') === 0) continue;
+				if ($filename[0] === '.') continue;
 				if (!self::mvDir($src . DIRECTORY_SEPARATOR . $filename, $dstpath, $overwrite)) $success = false;
 			}
 			self::rmDir($src);
 		}
 		return $success;
 	}
-	
+
 	static function iter($path)
 	{
 		return Sloth::iter(Gongo_Locator::get('DirectoryIterator', $path));
 	}
 
-	static function files($path, $files, $sort = "name") 
+	static function files($path, $files, $sort = "name")
 	{
 		$path = rtrim($path, DIRECTORY_SEPARATOR);
 		$result = array();
@@ -122,8 +122,8 @@ class Gongo_File
 		}
 		return $result;
 	}
-	
-	static function scandir($path, $order = 0, $sort = 'name', $context = null) 
+
+	static function scandir($path, $order = 0, $sort = 'name', $context = null)
 	{
 		$files = is_null($context) ? scandir($path, $order) : scandir($path, $order, $context) ;
 		if ($sort !== 'name') {
@@ -137,14 +137,14 @@ class Gongo_File
 		}
 		return $files;
 	}
-	
+
 	static function scanDirIter($path, $order = 0, $sort = 'name', $context = null)
 	{
 		$files = self::scandir($path, $order, $sort, $context);
 		return Sloth::iter($files);
 	}
 
-	static function readableSize($size, $round = 1, $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB')) 
+	static function readableSize($size, $round = 1, $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB'))
 	{
 		$mod = 1024;
 		for ($i = 0; $size > $mod; $i++) {

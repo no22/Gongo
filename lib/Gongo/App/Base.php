@@ -6,13 +6,13 @@ class Gongo_App_Base extends Gongo_Container
 	static public function cfg($oCfg = null)
 	{
 		if (is_null($oCfg)) return self::$cfg;
-		self::$cfg = $oCfg; 
+		self::$cfg = $oCfg;
 	}
 
 	public function __get($sName)
 	{
-		if (strpos($sName, '_', 0) === 0) {
-			if (strpos($sName, '_', 1) !== 1) {
+		if ($sName[0] === '_') {
+			if ($sName[1] !== '_') {
 				return $this->factory->getObj('Gongo_Container_Promise', $this, substr($sName, 1));
 			}
 			$sName = substr($sName, 2);

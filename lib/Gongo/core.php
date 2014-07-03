@@ -22,18 +22,18 @@ class Gongo_Container
 		$this->factory = Gongo_Locator::getInstance();
 		$this->initializeComponents($aComponents);
 	}
-	
+
 	public function __call($sName, $aArg)
 	{
-		if (strpos($sName, '_', 0) === 0) {
+		if ($sName[0] === '_') {
 			return Gongo_Fn_Partial::apply(array($this, substr($sName, 1)), $aArg);
 		}
 	}
 
 	public function __get($sName)
 	{
-		if (strpos($sName, '_', 0) === 0) {
-			if (strpos($sName, '_', 1) !== 1) {
+		if ($sName[0] === '_') {
+			if ($sName[1] !== '_') {
 				return $this->factory->getObj('Gongo_Container_Promise', $this, substr($sName, 1));
 			}
 			$sName = substr($sName, 2);
@@ -44,6 +44,26 @@ class Gongo_Container
 		return null;
 	}
 
+	protected function mergeComponents($aParentComponents, $aComponents)
+	{
+		foreach ($aComponents as $key => $value) {
+			if ($key[0] === '+' && is_array($value)) {
+				$normKey = '-' . substr($key, 1);
+				if (isset($aParentComponents[$key])) {
+					$aParentComponents[$normKey] = $aParentComponents[$key];
+					unset($aParentComponents[$key]);
+				}
+				if (isset($aParentComponents[$normKey])) {
+					$aComponents[$normKey] = array_merge($aParentComponents[$normKey], $value);
+				} else {
+					$aComponents[$normKey] = $value;
+				}
+				unset($aComponents[$key]);
+			}
+		}
+		return array_merge($aParentComponents, $aComponents);
+	}
+
 	public function componentClasses($sClass = null)
 	{
 		$sClass = is_null($sClass) ? get_class($this) : $sClass ;
@@ -52,18 +72,18 @@ class Gongo_Container
 		$sParent = get_parent_class($sClass);
 		if (!$sParent) return $aComponents;
 		$aParentComponents = $this->componentClasses($sParent);
-		return array_merge($aParentComponents, $aComponents);
+		return $this->mergeComponents($aParentComponents, $aComponents);
 	}
 
 	public function initializeComponents($aInjectComponents = null)
 	{
 		$aComponents = $this->componentClasses();
 		if (!is_null($aInjectComponents)) {
-			$aComponents = array_merge($aComponents, $aInjectComponents);
+			$aComponents = $this->mergeComponents($aComponents, $aInjectComponents);
 		}
 		$aOptions = array();
 		foreach ($aComponents as $sKey => $sClass) {
-			if (strpos($sKey, '-', 0) === 0) {
+			if ($sKey[0] === '-') {
 				$aOptions[substr($sKey,1)] = $sClass;
 			} else if (is_array($sClass)) {
 				$args = $sClass;
@@ -99,7 +119,7 @@ class Gongo_Container
 		}
 		return $this;
 	}
-	
+
 	public function afterInit($sName, $callback)
 	{
 		if (isset($this->components[$sName])) {
@@ -111,7 +131,7 @@ class Gongo_Container
 	{
 		$this->components[$sName] = $callback;
 	}
-	
+
 	public function defaultValue($options, $sName, $mValue)
 	{
 		if (!isset($options[$sName])) {
@@ -128,13 +148,13 @@ class Gongo_App_Base extends Gongo_Container
 	static public function cfg($oCfg = null)
 	{
 		if (is_null($oCfg)) return self::$cfg;
-		self::$cfg = $oCfg; 
+		self::$cfg = $oCfg;
 	}
 
 	public function __get($sName)
 	{
-		if (strpos($sName, '_', 0) === 0) {
-			if (strpos($sName, '_', 1) !== 1) {
+		if ($sName[0] === '_') {
+			if ($sName[1] !== '_') {
 				return $this->factory->getObj('Gongo_Container_Promise', $this, substr($sName, 1));
 			}
 			$sName = substr($sName, 2);
@@ -1514,21 +1534,21 @@ class Gongo_Container_Promise
 {
 	public $__obj;
 	public $__name;
-	
-	public function __construct($obj, $name) 
+
+	public function __construct($obj, $name)
 	{
-		$this->__obj = $obj; 
-		$this->__name = $name; 
+		$this->__obj = $obj;
+		$this->__name = $name;
 	}
 
-	public function __get($sName) 
+	public function __get($sName)
 	{
-		if (strpos($sName, '_', 0) === 0) {
+		if ($sName[0] === '_') {
 			return new self($this, substr($sName, 1));
 		}
 		return $this->__obj->{$this->__name}->{$sName};
 	}
-	
+
 	public function __force()
 	{
 		$aArgs = func_get_args();
@@ -1537,10 +1557,10 @@ class Gongo_Container_Promise
 		$aArgs = array_merge($aBind, $aArgs);
 		return call_user_func_array(array($this->__obj->{$this->__name}, $sName), $aArgs);
 	}
-	
+
 	public function __call($sName, $aArg)
 	{
-		if (strpos($sName, '_', 0) === 0) {
+		if ($sName[0] === '_') {
 			return Gongo_Fn_Partial::apply(array($this, '__force'), array(substr($sName, 1), $aArg));
 		}
 		return call_user_func_array(array($this->__obj->{$this->__name}, $sName), $aArg);
@@ -2114,7 +2134,7 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 		if (isset($arr['path'])) $url .= $arr['path'];
 		if (isset($arr['query']) && $arr['query'] !== '') $url .= '?' . $arr['query'];
 		if (isset($arr['fragment'])) $url .= '#' . $arr['fragment'];
-		if (!$shortUrl && strpos($url, '/', 0) === 0) {
+		if (!$shortUrl && $url[0] === '/') {
 			$url = $this->path($url);
 		}
 		return $url;
@@ -2163,7 +2183,7 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 	{
 		$obj = is_null($obj) ? $app : $obj ;
 		foreach ($aComponents as $route => $controller) {
-			if (strpos($route, '/', 0) === 0) {
+			if ($route[0] === '/') {
 				$route = substr($route, 1);
 				if ($this->match('*', "{$sPath}/{$route}/.*")) {
 					$obj->{$route}->init($app,"{$sPath}/{$route}", $aConditions, $obj);
@@ -2944,7 +2964,7 @@ class Gongo_File
 		return $path;
 	}
 
-	static function dirSize($path, $readable = false) 
+	static function dirSize($path, $readable = false)
 	{
 		$option = $readable ? '-sh' : '-sb' ;
 		$result = exec('du ' . $option . ' ' . $path);
@@ -2954,7 +2974,7 @@ class Gongo_File
 		return false;
 	}
 
-	static function rmDir($path, $delete = true, $top = null) 
+	static function rmDir($path, $delete = true, $top = null)
 	{
 		$path = rtrim($path, DIRECTORY_SEPARATOR);
 		$top = is_null($top) ? $path : $top ;
@@ -2974,12 +2994,12 @@ class Gongo_File
 		return true;
 	}
 
-	static function mv($src, $dst) 
+	static function mv($src, $dst)
 	{
 		return rename($src, $dst);
 	}
 
-	static function rm($path, $terminate = true) 
+	static function rm($path, $terminate = true)
 	{
 		$path = is_array($path) ? $path : array($path) ;
 		foreach ($path as $file) {
@@ -3007,7 +3027,7 @@ class Gongo_File
 			$src = rtrim($src, DIRECTORY_SEPARATOR);
 			foreach (scandir($src) as $filename) {
 				if ($filename === '.' || $filename === '..') continue;
-				if (strpos($filename, '.') === 0) continue;
+				if ($filename[0] === '.') continue;
 				if (!self::cpDir($src . DIRECTORY_SEPARATOR . $filename, $dstpath, $overwrite)) $success = false;
 			}
 		}
@@ -3029,20 +3049,20 @@ class Gongo_File
 			$src = rtrim($src, DIRECTORY_SEPARATOR);
 			foreach (scandir($src) as $filename) {
 				if ($filename === '.' || $filename === '..') continue;
-				if (strpos($filename, '.') === 0) continue;
+				if ($filename[0] === '.') continue;
 				if (!self::mvDir($src . DIRECTORY_SEPARATOR . $filename, $dstpath, $overwrite)) $success = false;
 			}
 			self::rmDir($src);
 		}
 		return $success;
 	}
-	
+
 	static function iter($path)
 	{
 		return Sloth::iter(Gongo_Locator::get('DirectoryIterator', $path));
 	}
 
-	static function files($path, $files, $sort = "name") 
+	static function files($path, $files, $sort = "name")
 	{
 		$path = rtrim($path, DIRECTORY_SEPARATOR);
 		$result = array();
@@ -3056,8 +3076,8 @@ class Gongo_File
 		}
 		return $result;
 	}
-	
-	static function scandir($path, $order = 0, $sort = 'name', $context = null) 
+
+	static function scandir($path, $order = 0, $sort = 'name', $context = null)
 	{
 		$files = is_null($context) ? scandir($path, $order) : scandir($path, $order, $context) ;
 		if ($sort !== 'name') {
@@ -3071,14 +3091,14 @@ class Gongo_File
 		}
 		return $files;
 	}
-	
+
 	static function scanDirIter($path, $order = 0, $sort = 'name', $context = null)
 	{
 		$files = self::scandir($path, $order, $sort, $context);
 		return Sloth::iter($files);
 	}
 
-	static function readableSize($size, $round = 1, $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB')) 
+	static function readableSize($size, $round = 1, $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB'))
 	{
 		$mod = 1024;
 		for ($i = 0; $size > $mod; $i++) {

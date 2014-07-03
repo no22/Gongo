@@ -94,7 +94,7 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 		if (isset($arr['path'])) $url .= $arr['path'];
 		if (isset($arr['query']) && $arr['query'] !== '') $url .= '?' . $arr['query'];
 		if (isset($arr['fragment'])) $url .= '#' . $arr['fragment'];
-		if (!$shortUrl && strpos($url, '/', 0) === 0) {
+		if (!$shortUrl && $url[0] === '/') {
 			$url = $this->path($url);
 		}
 		return $url;
@@ -143,7 +143,7 @@ class Gongo_App_Url_Router extends Gongo_App_Base
 	{
 		$obj = is_null($obj) ? $app : $obj ;
 		foreach ($aComponents as $route => $controller) {
-			if (strpos($route, '/', 0) === 0) {
+			if ($route[0] === '/') {
 				$route = substr($route, 1);
 				if ($this->match('*', "{$sPath}/{$route}/.*")) {
 					$obj->{$route}->init($app,"{$sPath}/{$route}", $aConditions, $obj);
