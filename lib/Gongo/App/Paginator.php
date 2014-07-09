@@ -10,12 +10,13 @@ class Gongo_App_Paginator extends Gongo_App_Base
 		'-searchColumns' => null,
 		'-columns' => null,
 		'-url' => null,
+		'-reset' => false,
 	);
 
 	function prepare($app, $mapper = null)
 	{
 		if ($mapper) $this->mapper = $mapper;
-		$this->context->setPagingParams($app, $this->options->sessionName);
+		$this->context->setPagingParams($app, $this->options->sessionName, $this->options->reset);
 		return $this;
 	}
 

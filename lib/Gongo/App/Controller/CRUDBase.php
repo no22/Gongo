@@ -21,6 +21,9 @@ class Gongo_App_Controller_CRUDBase extends Gongo_App_Controller
 		'-secureAction' => 'edit|confirm',
 		'-validateAction' => 'edit|confirm',
 		'-filterAction' => 'edit|confirm',
+		'-formErrorName' => null,
+		'-formSessionSuffix' => null,
+		'-useFormDefault' => false,
 	);
 
 	function __construct($aComponents = array())
@@ -47,7 +50,7 @@ class Gongo_App_Controller_CRUDBase extends Gongo_App_Controller
 
 	function getEdit($app)
 	{
-		$form = $this->form->restore($app, $this->mapper, $app->get->id, $this->options->id, $this->converter);
+		$form = $this->form->restore($app, $this->mapper, $app->get->id, $this->options->id, $this->converter, $this->options->formErrorName, $this->options->formSessionSuffix, $this->options->useFormDefault);
 		return $this->render($app, '/edit', compact('form'));
 	}
 

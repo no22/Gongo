@@ -1,5 +1,5 @@
 <?php
-class Gongo_App_Form extends Gongo_App_Container 
+class Gongo_App_Form extends Gongo_App_Container
 {
 	function makeConfirmSessionName($sessionName, $suffix = 'ConfirmData')
 	{
@@ -19,13 +19,13 @@ class Gongo_App_Form extends Gongo_App_Container
 		return $app->session->{$sessionName};
 	}
 
-	function loadForm($app, $bean) 
+	function loadForm($app, $bean)
 	{
 		$data = $bean instanceof Gongo_Bean ? $bean->_() : (array) $bean ;
 		return Gongo_Bean::cast($this, $data);
 	}
 
-	function importForm($app, $mapper, $bean = null, $converter = null) 
+	function importForm($app, $mapper, $bean = null, $converter = null)
 	{
 		$bean = $bean ? $bean : $mapper->emptyBean() ;
 		if (!is_null($converter)) {
@@ -38,7 +38,7 @@ class Gongo_App_Form extends Gongo_App_Container
 		return $form;
 	}
 
-	function exportForm($app, $mapper, $bean = null, $converter = null) 
+	function exportForm($app, $mapper, $bean = null, $converter = null)
 	{
 		$bean = $bean ? $bean : $mapper->emptyBean() ;
 		if (!is_null($converter)) {
@@ -50,9 +50,11 @@ class Gongo_App_Form extends Gongo_App_Container
 		}
 		return $bean;
 	}
-	
-	function restore($app, $mapper, $id, $sessionName = '', $converter = null, $errorName = 'validationError', $suffix = 'ConfirmData')
+
+	function restore($app, $mapper, $id, $sessionName = '', $converter = null, $errorName = null, $suffix = null, $useFormDefault = false)
 	{
+		$errorName = is_null($errorName) ? 'validationError' : $errorName ;
+		$suffix = is_null($suffix) ? 'ConfirmData' : $suffix ;
 		$sessionName = $sessionName != '' ? $sessionName : $mapper->options->table ;
 		if ($app->error->{$errorName}) {
 			$form = $this->loadForm($app, $app->error->{$errorName}->postdata);
@@ -61,6 +63,8 @@ class Gongo_App_Form extends Gongo_App_Container
 			if ($confirmData) {
 				$form = $this->loadForm($app, $confirmData);
 				$this->saveConfirmData($app, $sessionName, null, $suffix);
+			} else if ($useFormDefault && !$id) {
+				$form = $this;
 			} else {
 				$bean = $id instanceof Gongo_Bean ? $id : $mapper->readBean($app, $id) ;
 				$form = $this->importForm($app, $mapper, $bean, $converter);
@@ -69,14 +73,14 @@ class Gongo_App_Form extends Gongo_App_Container
 		return $form;
 	}
 
-	function restoreForm($app, $controller, $id, $mapperName = 'mapper', $converterName = 'converter', $errorName = 'validationError', $suffix = 'ConfirmData') 
+	function restoreForm($app, $controller, $id, $mapperName = 'mapper', $converterName = 'converter', $errorName = 'validationError', $suffix = 'ConfirmData')
 	{
 		$sessionName = $controller->options->id ? $controller->options->id : get_class($controller) ;
 		$converter = $controller->{$converterName};
 		$mapper = $controller->{$mapperName};
 		return $this->restore($app, $mapper, $id, $sessionName, $converter, $errorName, $suffix);
 	}
-	
+
 	function exportBean($app, $mapper, $bean, $converter = null)
 	{
 		$data = $bean instanceof Gongo_Bean ? $bean->_() : $bean ;

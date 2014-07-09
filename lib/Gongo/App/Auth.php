@@ -3,7 +3,7 @@ class Gongo_App_Auth extends Gongo_App_Auth_Base
 {
 	public $uses = array(
 		'crypt' => null,
-		'userProxy' => null, 
+		'userProxy' => null,
 		'-login' => '/login',
 		'-redirect' => '/',
 		'-force' => false,
@@ -13,13 +13,13 @@ class Gongo_App_Auth extends Gongo_App_Auth_Base
 		'-errorName' => 'loginError',
 		'-columnPasswordSalt' => 'salt',
 	);
-	
+
 	public function isLoginUrl($app, $url = null)
 	{
 		$url = is_null($url) ? $app->url->requestUrl : $url ;
 		return strpos($url, $app->replacePathArgs($this->options->login), 0) === 0;
 	}
-	
+
 	public function isValid($app = null)
 	{
 		$loginUser = $this->readLoginUser($app);
@@ -42,7 +42,7 @@ class Gongo_App_Auth extends Gongo_App_Auth_Base
 				$this->redirectToLogin($app);
 			}
 			if ($app->url->requestMethod === 'POST') {
-				$userId = $app->post->{$this->options->loginFormUserId};	
+				$userId = $app->post->{$this->options->loginFormUserId};
 				$password = $app->post->{$this->options->loginFormPassword};
 				if (is_null($callback)) {
 					$user = $this->userProxy->getUserByLoginId($app, $this, $userId);
@@ -87,7 +87,7 @@ class Gongo_App_Auth extends Gongo_App_Auth_Base
 		$key = $this->redirectSessionKey($app);
 		$app->session->{$key} = null;
 	}
-	
+
 	public function redirectToLogin($app)
 	{
 		$app->redirect($this->options->login);
