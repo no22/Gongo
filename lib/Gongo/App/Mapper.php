@@ -13,6 +13,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		'-namedScopes' => array(),
 		'-tableAlias' => array(),
 		'-autoPopulate' => true,
+		'-autoIncrement' => true,
 		'-createdDateColumn' => 'created',
 		'-modifiedDateColumn' => 'modified',
 		'-classPrefix' => '',
@@ -43,6 +44,7 @@ class Gongo_App_Mapper extends Gongo_App_Base
 		$obj->namedScopes($this->options->namedScopes);
 		$obj->tableAlias($this->options->tableAlias);
 		$obj->autoPopulate($this->options->autoPopulate);
+		$obj->autoIncrement($this->options->autoIncrement);
 		$obj->createdDateColumn($this->options->createdDateColumn);
 		$obj->modifiedDateColumn($this->options->modifiedDateColumn);
 		$obj->joinMapper($this);
