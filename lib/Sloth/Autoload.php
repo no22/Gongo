@@ -11,7 +11,7 @@ class Sloth_Autoload
             self::$slothPath = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
         }
         $sPath = self::$slothPath . strtr($sClass, array('_' => DIRECTORY_SEPARATOR)).'.php';
-        is_file($sPath) and include($sPath);
+        is_file($sPath) and require($sPath);
     }
 
     public static function register($limit = true)

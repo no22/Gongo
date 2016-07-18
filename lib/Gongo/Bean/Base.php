@@ -1,17 +1,22 @@
 <?php
-class Gongo_Bean_Base 
+class Gongo_Bean_Base
 {
 	public $__ = null;
-	
+
 	public function __get($key)
 	{
 		if ($key === '_') {
 			if (is_null($this->__)) return null;
 			$aComponents = $this->___initializeComponents();
-			$this->_ = Gongo_Locator::get('Gongo_Container', $aComponents);
-			return $this->_;
+			return $this->_ = Gongo_Locator::get('Gongo_Container', $aComponents);
 		}
 		return null;
+	}
+
+	public function __set($key, $value)
+	{
+		if ($key === '_') $this->_ = $value;
+		return $value;
 	}
 
 	public function ___componentClasses($sClass = null)

@@ -113,6 +113,13 @@ class Gongo_Container
 		return $this;
 	}
 
+	public function beforeInit($sName, $callback)
+	{
+		if (isset($this->components[$sName])) {
+			$this->components[$sName] = Gongo_Fn::before($this->components[$sName], $callback);
+		}
+	}
+
 	public function afterInit($sName, $callback)
 	{
 		if (isset($this->components[$sName])) {

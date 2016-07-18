@@ -11,6 +11,7 @@ class Gongo_App_Html_Twig extends Gongo_App_Html_AbstractTemplate
 	{
 		parent::__construct($options);
 		$this->afterInit('loader', $this->_initTwigLoader());
+		$this->beforeInit('renderer', $this->_injectTwigLoader());
 		$this->afterInit('renderer', $this->_initTwigRenderer());
 	}
 
@@ -25,9 +26,14 @@ class Gongo_App_Html_Twig extends Gongo_App_Html_AbstractTemplate
 		return $loader;
 	}
 
+	public function injectTwigLoader($args)
+	{
+		$args[0] = $this->loader;
+		return $args;
+	}
+
 	public function initTwigRenderer($twig)
 	{
-		$twig->setLoader($this->loader);
 		$cachePath = Gongo_App::$environment->path->twig->cachePath;
 		$cachePath = $cachePath ? substr($cachePath, 0, -1) : false ;
 		$twig->setCache($cachePath);
