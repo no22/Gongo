@@ -120,6 +120,13 @@ class Gongo_Container
 		return $this;
 	}
 
+	public function beforeInit($sName, $callback)
+	{
+		if (isset($this->components[$sName])) {
+			$this->components[$sName] = Gongo_Fn::before($this->components[$sName], $callback);
+		}
+	}
+
 	public function afterInit($sName, $callback)
 	{
 		if (isset($this->components[$sName])) {
@@ -1100,19 +1107,24 @@ class Gongo_File_Path
 	}
 }
 
-class Gongo_Bean_Base 
+class Gongo_Bean_Base
 {
 	public $__ = null;
-	
+
 	public function __get($key)
 	{
 		if ($key === '_') {
 			if (is_null($this->__)) return null;
 			$aComponents = $this->___initializeComponents();
-			$this->_ = Gongo_Locator::get('Gongo_Container', $aComponents);
-			return $this->_;
+			return $this->_ = Gongo_Locator::get('Gongo_Container', $aComponents);
 		}
 		return null;
+	}
+
+	public function __set($key, $value)
+	{
+		if ($key === '_') $this->_ = $value;
+		return $value;
 	}
 
 	public function ___componentClasses($sClass = null)
@@ -1139,7 +1151,7 @@ class Gongo_Bean_Base
 class Gongo_Bean extends Gongo_Bean_Base implements IteratorAggregate
 {
 	protected $_data;
-	
+
 	static function import($bean, $data, $attr = null)
 	{
 		$ary = array();
@@ -1159,7 +1171,7 @@ class Gongo_Bean extends Gongo_Bean_Base implements IteratorAggregate
 		}
 		return $ary;
 	}
-	
+
 	static function merge($bean1, $bean2, $attr = null)
 	{
 		$data = $bean2 instanceof Gongo_Bean ? $bean2->_() : (array) $bean2 ;
@@ -1170,7 +1182,7 @@ class Gongo_Bean extends Gongo_Bean_Base implements IteratorAggregate
 		}
 		return $bean1;
 	}
-	
+
 	static function mergeRecursive($bean1, $bean2, $attr = null)
 	{
 		$data = $bean2 instanceof Gongo_Bean ? $bean2->_() : (array) $bean2 ;
@@ -1224,7 +1236,7 @@ class Gongo_Bean extends Gongo_Bean_Base implements IteratorAggregate
 	{
 		self::import($this, $ary);
 	}
-	
+
 	public function __get($key)
 	{
 		if ($key === '_') return parent::__get($key);
@@ -1233,27 +1245,28 @@ class Gongo_Bean extends Gongo_Bean_Base implements IteratorAggregate
 
 	public function __set($key, $value)
 	{
+		if ($key === '_') return parent::__set($key, $value);
 		$this->_data[$key] = $value;
 		return $value;
 	}
-	
+
 	public function __isset($key)
 	{
 		return isset($this->_data[$key]);
 	}
-	
+
 	public function __unset($key)
 	{
 		unset($this->_data[$key]);
 	}
-	
+
 	public function __call($name, $args)
 	{
 		$default = array_shift($args);
 		$value = $this->{$name};
 		return is_null($value) ? $default : $value ;
 	}
-	
+
 	public function _($ary = null)
 	{
 		if (is_null($ary)) {
@@ -1267,14 +1280,14 @@ class Gongo_Bean extends Gongo_Bean_Base implements IteratorAggregate
 	{
 		return $this->_(array());
 	}
-	
+
 	public function ___($ary = array())
 	{
 		$className = get_class($this);
 		return Gongo_Locator::get($className, $ary);
 	}
-	
-	public function getIterator() 
+
+	public function getIterator()
 	{
 		return Sloth::iter(new ArrayIterator($this->_data));
 	}
